@@ -1,0 +1,12 @@
+{
+  "name": "pcap-element-example-vue",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "vue": "^3.0.0",
+    "pcap-element": "file:../../"
+  },
+  "scripts": {
+    "start": "npx serve -s ."
+  }
+} 

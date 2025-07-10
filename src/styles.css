@@ -1,0 +1,338 @@
+/* PCAP Element Styles - Academic/Professional Theme */
+/*
+  该文件为PCAP元素及其子元素提供整体样式，
+  采用简洁、专业的配色和布局，适合数据展示场景。
+*/
+
+:host {
+  /* 组件根节点，采用等宽字体，设置边框、圆角和内边距，提升可读性 */
+  display: block;
+  font-family: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 12px;
+  margin: 12px 0;
+  background: #fafafa;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.loading {
+  /* 加载中提示，居中显示，字体颜色较浅 */
+  text-align: center;
+  padding: 16px;
+  color: #666;
+  font-size: 12px;
+}
+
+.error {
+  /* 错误信息样式，红色背景和边框，突出警告 */
+  color: #d32f2f;
+  background: #ffebee;
+  padding: 8px 10px;
+  border-radius: 3px;
+  margin: 6px 0;
+  font-size: 11px;
+  border-left: 3px solid #d32f2f;
+}
+
+.summary {
+  /* 摘要信息区域，浅灰背景，圆角和边框 */
+  background: #f3f4f6;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.summary h3 {
+  /* 摘要标题，深色字体，大写字母，增强可读性 */
+  margin: 0 0 6px 0;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summary-grid {
+  /* 摘要统计信息采用flex布局，横向排列 */
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.summary-item {
+  /* 单项统计卡片，白底、圆角、边框，居中显示 */
+  background: white;
+  padding: 6px 8px;
+  border-radius: 3px;
+  text-align: center;
+  border: 1px solid #e5e7eb;
+  flex: 1;
+  min-width: 0;
+}
+
+.summary-item .label {
+  /* 统计项标签，灰色小号字体，大写 */
+  font-size: 10px;
+  color: #6b7280;
+  text-transform: uppercase;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+.summary-item .value {
+  /* 统计值，字号较大，深色加粗 */
+  font-size: 15px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-top: 2px;
+}
+
+.summary-details {
+  /* 协议分布、活跃地址等详细信息，横向wrap布局 */
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.detail-item {
+  /* 详细项卡片，浅色背景，圆角，边框 */
+  color: #374151;
+  background: #f8f9fa;
+  padding: 4px 8px;
+  border-radius: 3px;
+  border: 1px solid #e9ecef;
+  white-space: nowrap;
+}
+
+.detail-item strong {
+  /* 详细项标题加粗 */
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.packets {
+  /* 数据包列表区域，白底、圆角、边框 */
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  background: white;
+}
+
+.packet.even {
+  /* 偶数行数据包，白色背景 */
+  background: #fff;
+}
+
+.packet.odd {
+  /* 奇数行数据包，浅灰背景，便于区分 */
+  background: #f8fafc;
+}
+
+.packet {
+  /* 单个数据包卡片，内边距，去除阴影和边框 */
+  margin: 0;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  transition: background-color 0.2s ease;
+  position: relative;
+}
+
+.packet:hover {
+  /* 鼠标悬停高亮 */
+  background-color: #f8fafc !important;
+}
+
+.packet-divider {
+  /* 数据包分隔线 */
+  height: 1px;
+  background: #e5e7eb;
+  margin: 0;
+  opacity: 0.6;
+}
+
+.packet-header {
+  /* 数据包头部，flex布局，左右分布 */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 11px;
+}
+
+.packet-title {
+  /* 包标题区域，协议徽章与编号并列 */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.packet-info {
+  /* 包内详细信息，采用grid布局 */
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 6px;
+  font-size: 10px;
+}
+
+.packet-info .info-item {
+  /* 信息项，浅灰背景，圆角 */
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 4px;
+  background: #f3f4f6;
+  border-radius: 2px;
+}
+
+.packet-info .info-label {
+  /* 信息项标签，灰色加粗 */
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.packet-info .info-value {
+  /* 信息项值，深色加粗 */
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.packet-data {
+  /* 数据包原始数据区域，自动换行，最大高度滚动 */
+  background: #fff;
+  padding: 6px 8px;
+  border-radius: 3px;
+  word-break: break-all;
+  max-height: 80px;
+  overflow-y: auto;
+  font-size: 10px;
+  color: #495057;
+}
+
+.protocol-badge {
+  /* 协议徽章，圆角色块，区分不同协议 */
+  background: #6366f1;
+  color: white;
+  padding: 1px 4px;
+  border-radius: 8px;
+  font-size: 9px;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+/* 不同协议类型的徽章颜色 */
+.protocol-badge.smtp {
+  background: #f59e0b;
+}
+
+.protocol-badge.tcp {
+  background: #3b82f6;
+}
+
+.protocol-badge.udp {
+  background: #8b5cf6;
+}
+
+.protocol-badge.icmp {
+  background: #ef4444;
+}
+
+.protocol-badge.arp {
+  background: #6b7280;
+}
+
+.protocol-badge.http {
+  background: #10b981;
+}
+
+.protocol-badge.https {
+  background: #059669;
+}
+
+/* 响应式设计，适配移动端 */
+@media (max-width: 768px) {
+  :host {
+    padding: 8px;
+    margin: 8px 0;
+    font-size: 10px;
+  }
+  
+  .summary-grid {
+    flex-direction: column;
+  }
+  
+  .packet-info {
+    grid-template-columns: 1fr;
+  }
+  
+  .packet-header {
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+  }
+}
+
+/* 加载动画效果 */
+.loading {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* 摘要卡片悬停高亮 */
+.summary-item:hover {
+  background: #f8f9fa;
+  transition: background-color 0.15s ease;
+}
+
+/* 自定义滚动条样式 */
+.packets::-webkit-scrollbar {
+  width: 6px;
+}
+
+.packets::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.packets::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.packets::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+.packet-data::-webkit-scrollbar {
+  width: 4px;
+}
+
+.packet-data::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 2px;
+}
+
+.packet-data::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 2px;
+} 

@@ -1,0 +1,13 @@
+{
+  "name": "pcap-element-example-react",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "pcap-element": "file:../../"
+  },
+  "scripts": {
+    "start": "npx serve -s ."
+  }
+} 

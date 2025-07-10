@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html ng-app="pcapDemo">
+<head>
+  <meta charset="utf-8">
+  <title>PCAP Element AngularJS 1.x Demo</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+  <link rel="stylesheet" href="../../dist/styles.css">
+  <script type="module" src="../../dist/pcap-element.js"></script>
+</head>
+<body ng-controller="MainCtrl">
+  <h2>PCAP Element AngularJS 1.x 示例</h2>
+  <input type="text" ng-model="src" placeholder="输入PCAP文件URL" style="width:300px;">
+  <button ng-click="load()">加载</button>
+  <br><br>
+  <pcap-element src="{{src}}"></pcap-element>
+  <script>
+    angular.module('pcapDemo', [])
+      .controller('MainCtrl', ['$scope', function($scope) {
+        $scope.src = '/public/http-packets.pcap'; // 默认示例
+        $scope.load = function() {
+          // 触发AngularJS数据绑定，pcap-element会自动响应src变化
+        };
+      }]);
+  </script>
+</body>
+</html> 

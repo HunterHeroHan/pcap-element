@@ -1,0 +1,13 @@
+{
+  "name": "pcap-element-example-angular",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@angular/core": "^16.0.0",
+    "@angular/platform-browser": "^16.0.0",
+    "pcap-element": "file:../../"
+  },
+  "scripts": {
+    "start": "npx serve -s ."
+  }
+} 

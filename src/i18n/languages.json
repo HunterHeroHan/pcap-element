@@ -1,0 +1,40 @@
+{
+  "zh-cn": {
+    "loading": "加载PCAP数据中...",
+    "errorNoSrc": "未提供src属性",
+    "errorLoadFailed": "加载PCAP文件失败",
+    "summary": "PCAP摘要",
+    "totalPackets": "总数据包数",
+    "totalBytes": "总字节数",
+    "protocolTypes": "协议种类",
+    "protocolDistribution": "协议分布",
+    "topSources": "活跃源地址",
+    "topDestinations": "活跃目的地址",
+    "packetList": "数据包列表",
+    "packet": "数据包",
+    "sourceAddress": "源地址",
+    "destinationAddress": "目的地址",
+    "length": "长度",
+    "protocol": "协议",
+    "bytes": "字节"
+  },
+  "en-us": {
+    "loading": "Loading PCAP data...",
+    "errorNoSrc": "No src attribute provided",
+    "errorLoadFailed": "Failed to load PCAP file",
+    "summary": "PCAP Summary",
+    "totalPackets": "Total Packets",
+    "totalBytes": "Total Bytes",
+    "protocolTypes": "Protocol Types",
+    "protocolDistribution": "Protocol Distribution",
+    "topSources": "Top Sources",
+    "topDestinations": "Top Destinations",
+    "packetList": "Packet List",
+    "packet": "Packet",
+    "sourceAddress": "Source",
+    "destinationAddress": "Destination",
+    "length": "Length",
+    "protocol": "Protocol",
+    "bytes": "bytes"
+  }
+} 
