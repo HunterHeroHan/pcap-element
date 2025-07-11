@@ -104,9 +104,6 @@ import type { PcapPacket, PcapData } from 'pcap-element/dist/pcap-parser';
 
 - 只需在入口引入js/css，然后像普通HTML标签一样用即可
 
-### 4. How to use in React/Vue/Angular?
-
-- Just import js/css in your entry and use `<pcap-element>` as a normal HTML tag.
 
 ## 🤝 贡献 | Contributing
 
