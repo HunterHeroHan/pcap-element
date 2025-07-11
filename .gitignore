@@ -56,3 +56,10 @@ jspm_packages/
 .env
 .env.test
 .env.production 
+
+# Exclude dependencies and build outputs in example subprojects
+example/*/node_modules/
+example/*/dist/
+example/*/build/
+example/*/package-lock.json
+example/*/yarn.lock 

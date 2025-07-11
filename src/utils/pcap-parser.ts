@@ -154,7 +154,10 @@ export class PcapParser {
           const srcPort = (tcpData[0] << 8) | tcpData[1];
           const dstPort = (tcpData[2] << 8) | tcpData[3];
           port = srcPort;
-          flags = this.parseTcpFlags(tcpData[13]);
+          // 确保tcpData[13]存在且有效
+          if (tcpData.length > 13) {
+            flags = this.parseTcpFlags(tcpData[13]);
+          }
           if (dstPort === 25) protocol = 'SMTP';
         }
         break;
@@ -177,12 +180,17 @@ export class PcapParser {
    * 解析TCP标志位
    */
   private static parseTcpFlags(flags: number): TcpFlag[] {
-    if (!Number.isInteger(flags) || flags < 0 || flags > 0b111111) {
-      throw new Error('无效的TCP标志位值，必须是0~63之间的整数');
+    // 确保flags是有效的字节值（0-255）
+    if (typeof flags !== 'number' || !Number.isFinite(flags)) {
+      return [];
     }
+    
+    // 将flags限制在0-255范围内，然后只取低6位作为TCP标志位
+    const validFlags = (flags & 0xFF) & 0x3F; // 0x3F = 0b111111，只取低6位
+    
     const activeFlags: TcpFlag[] = [];
     for (let i = 0; i < TCP_FLAG_NAMES.length; i++) {
-      if (flags & (1 << i)) {
+      if (validFlags & (1 << i)) {
         activeFlags.push(TCP_FLAG_NAMES[i]);
       }
     }

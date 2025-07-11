@@ -1,18 +1,24 @@
 {
-  "name": "pcap-element-example-angularjs",
+  "name": "pcap-preview-app",
   "version": "1.0.0",
-  "private": true,
-  "keywords": [
-    "pcap",
-    "web-component",
-    "angularjs",
-    "network",
-    "demo",
-    "example",
-    "packet",
-    "network-analysis"
-  ],
+  "description": "PCAP文件预览应用 - 基于AngularJS 1.8和pcap-element",
+  "main": "index.html",
   "scripts": {
-    "start": "npx serve -s ."
-  }
+    "start": "http-server -p 8080 -c-1",
+    "dev": "http-server -p 8080 -c-1 -o"
+  },
+  "dependencies": {
+    "angular": "^1.8.3"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "keywords": [
+    "angularjs",
+    "pcap",
+    "network",
+    "analysis"
+  ],
+  "author": "Hunter",
+  "license": "MIT"
 } 

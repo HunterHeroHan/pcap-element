@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCP Flags 分析</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .error {
+            background-color: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border-left: 4px solid #f44336;
+        }
+        .success {
+            background-color: #e8f5e8;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border-left: 4px solid #4caf50;
+        }
+        .info {
+            background-color: #e3f2fd;
+            color: #1565c0;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border-left: 4px solid #2196f3;
+        }
+        .warning {
+            background-color: #fff3e0;
+            color: #ef6c00;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border-left: 4px solid #ff9800;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        button {
+            background-color: #2196f3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #1976d2;
+        }
+        .hex-view {
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            line-height: 1.2;
+        }
+        .packet-details {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .invalid-flag {
+            background-color: #ffebee;
+            border-left: 4px solid #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>TCP Flags 分析工具</h1>
+        
+        <div class="info">
+            <h3>分析说明</h3>
+            <p>此工具用于分析frag_http_req.pcap文件中的TCP标志位，找出导致解析错误的具体值。</p>
+            <p>pcap-element库要求TCP标志位值必须在0~63范围内（6位二进制）。</p>
+        </div>
+
+        <div>
+            <button onclick="analyzeTcpFlags()">分析TCP标志位</button>
+            <button onclick="testPcapParser()">测试pcap-element解析</button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        async function analyzeTcpFlags() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<div class="info">正在分析TCP标志位...</div>';
+
+            try {
+                const response = await fetch('sample-data/frag_http_req.pcap');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const arrayBuffer = await response.arrayBuffer();
+                const buffer = new Uint8Array(arrayBuffer);
+                
+                // 手动解析数据包，查找TCP包
+                const packets = [];
+                let offset = 24; // PCAP header size
+                let packetCount = 0;
+                
+                while (offset < buffer.length - 16) { // 16 = packet header size
+                    packetCount++;
+                    const packetHeader = buffer.slice(offset, offset + 16);
+                    const capturedLength = new DataView(packetHeader.buffer, packetHeader.byteOffset + 8, 4).getUint32(0, false);
+                    
+                    if (capturedLength === 0) break;
+                    
+                    const packetData = buffer.slice(offset + 16, offset + 16 + capturedLength);
+                    const packetInfo = analyzePacketData(packetData, offset, packetCount);
+                    
+                    if (packetInfo && packetInfo.protocol === 'TCP') {
+                        packets.push(packetInfo);
+                    }
+                    
+                    offset += 16 + capturedLength;
+                }
+                
+                let results = '<div class="info"><h3>TCP数据包分析结果</h3>';
+                results += `<p>总数据包数: ${packetCount}</p>`;
+                results += `<p>TCP数据包数: ${packets.length}</p></div>`;
+                
+                if (packets.length === 0) {
+                    results += '<div class="warning"><p>未找到TCP数据包</p></div>';
+                } else {
+                    packets.forEach((packet, index) => {
+                        const isValid = packet.tcpFlags >= 0 && packet.tcpFlags <= 63;
+                        const cssClass = isValid ? 'packet-details' : 'packet-details invalid-flag';
+                        
+                        results += `
+                            <div class="${cssClass}">
+                                <h4>数据包 ${packet.packetNumber} (TCP包 ${index + 1})</h4>
+                                <p><strong>TCP标志位值:</strong> ${packet.tcpFlags} (0x${packet.tcpFlags.toString(16).toUpperCase()})</p>
+                                <p><strong>标志位二进制:</strong> ${packet.tcpFlags.toString(2).padStart(8, '0')}</p>
+                                <p><strong>是否有效:</strong> ${isValid ? '✅ 是' : '❌ 否 (超出0~63范围)'}</p>
+                                <p><strong>源端口:</strong> ${packet.srcPort}</p>
+                                <p><strong>目标端口:</strong> ${packet.dstPort}</p>
+                                <p><strong>数据包偏移:</strong> ${packet.offset}</p>
+                                <p><strong>数据包长度:</strong> ${packet.length}</p>
+                                <div class="hex-view">
+                                    <strong>TCP头部十六进制:</strong><br>
+                                    ${formatHex(packet.tcpHeader)}
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                resultsDiv.innerHTML = results;
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="error">
+                        <h3>分析失败</h3>
+                        <p>错误信息: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function analyzePacketData(data, packetOffset, packetNumber) {
+            if (data.length < 14) return null; // Ethernet header minimum
+            
+            const etherType = (data[12] << 8) | data[13];
+            
+            if (etherType === 0x0800) { // IPv4
+                if (data.length < 34) return null; // Ethernet + IP + TCP minimum
+                
+                const ipProtocol = data[23];
+                if (ipProtocol === 6) { // TCP
+                    const tcpStart = 34; // Ethernet(14) + IP(20)
+                    if (data.length < tcpStart + 20) return null; // TCP header minimum
+                    
+                    const tcpData = data.slice(tcpStart, tcpStart + 20);
+                    const srcPort = (tcpData[0] << 8) | tcpData[1];
+                    const dstPort = (tcpData[2] << 8) | tcpData[3];
+                    const tcpFlags = tcpData[13]; // TCP flags byte
+                    
+                    return {
+                        protocol: 'TCP',
+                        srcPort,
+                        dstPort,
+                        tcpFlags,
+                        tcpHeader: tcpData,
+                        offset: packetOffset,
+                        length: data.length,
+                        packetNumber
+                    };
+                }
+            }
+            
+            return null;
+        }
+
+        function formatHex(data) {
+            let hex = '';
+            for (let i = 0; i < data.length; i++) {
+                hex += data[i].toString(16).padStart(2, '0').toUpperCase() + ' ';
+                if ((i + 1) % 16 === 0) hex += '<br>';
+            }
+            return hex;
+        }
+
+        async function testPcapParser() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<div class="info">正在测试pcap-element解析...</div>';
+
+            try {
+                const response = await fetch('sample-data/frag_http_req.pcap');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const arrayBuffer = await response.arrayBuffer();
+                
+                // 尝试解析
+                const { PcapParser } = await import('node_modules/pcap-element/dist/pcap-element-lib.js');
+                
+                try {
+                    const result = PcapParser.parsePcapFile(arrayBuffer);
+                    resultsDiv.innerHTML = `
+                        <div class="success">
+                            <h3>解析成功！</h3>
+                            <p>数据包数量: ${result.packets.length}</p>
+                            <p>总字节数: ${result.summary.totalBytes}</p>
+                        </div>
+                        <div class="info">
+                            <h3>解析结果</h3>
+                            <pre>${JSON.stringify(result, null, 2)}</pre>
+                        </div>
+                    `;
+                } catch (parseError) {
+                    resultsDiv.innerHTML = `
+                        <div class="error">
+                            <h3>解析失败</h3>
+                            <p>错误信息: ${parseError.message}</p>
+                            <p>错误堆栈: ${parseError.stack}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="error">
+                        <h3>加载失败</h3>
+                        <p>错误信息: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html> 

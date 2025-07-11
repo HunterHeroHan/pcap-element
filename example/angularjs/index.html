@@ -1,26 +1,231 @@
 <!DOCTYPE html>
-<html ng-app="pcapDemo">
+<html lang="zh-CN" ng-app="pcapApp">
 <head>
-  <meta charset="utf-8">
-  <title>PCAP Element AngularJS 1.x Demo</title>
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
-  <link rel="stylesheet" href="../../dist/styles.css">
-  <script type="module" src="../../dist/pcap-element.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PCAP-Element 测试应用</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- pcap-element 样式 -->
+    <link rel="stylesheet" href="../../dist/styles.css">
 </head>
-<body ng-controller="MainCtrl">
-  <h2>PCAP Element AngularJS 1.x 示例</h2>
-  <input type="text" ng-model="src" placeholder="输入PCAP文件URL" style="width:300px;">
-  <button ng-click="load()">加载</button>
-  <br><br>
-  <pcap-element src="{{src}}"></pcap-element>
-  <script>
-    angular.module('pcapDemo', [])
-      .controller('MainCtrl', ['$scope', function($scope) {
-        $scope.src = '/public/http-packets.pcap'; // 默认示例
-        $scope.load = function() {
-          // 触发AngularJS数据绑定，pcap-element会自动响应src变化
-        };
-      }]);
-  </script>
+<body ng-controller="PcapController as vm">
+    <div class="container">
+        <header class="app-header">
+            <h1><i class="fas fa-network-wired"></i> PCAP-Element 测试应用</h1>
+            <p>测试 pcap-element 库的 PCAP 文件解析功能</p>
+        </header>
+
+        <main class="main-content">
+            <!-- 文件选择区域 -->
+            <section class="sample-files">
+                <div class="sample-card">
+                    <h3><i class="fas fa-list"></i> 文件选择测试</h3>
+                    <p>选择示例文件或输入URL进行 pcap-element 库测试：</p>
+                    
+                    <!-- 示例文件选择 -->
+                    <div class="file-select-section">
+                        <h4><i class="fas fa-folder"></i> 示例文件</h4>
+                        <div class="select-container">
+                            <select ng-model="vm.selectedSampleFile" class="file-select">
+                                <option value="">-- 选择示例文件 --</option>
+                                <option ng-repeat="file in vm.sampleFiles" value="{{$index}}">
+                                    {{file.name}} - {{file.size}} - {{file.description}}
+                                </option>
+                            </select>
+                            <button class="btn btn-primary" ng-click="vm.loadSelectedFile()" ng-disabled="!vm.selectedSampleFile">
+                                <i class="fas fa-play"></i> 测试
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- URL输入 -->
+                    <div class="url-input-section">
+                        <h4><i class="fas fa-link"></i> 自定义URL</h4>
+                        <div class="url-container">
+                            <input type="text" 
+                                   ng-model="vm.customUrl" 
+                                   placeholder="输入PCAP文件URL，例如: https://example.com/file.pcap"
+                                   class="url-input">
+                            <button class="btn btn-secondary" ng-click="vm.loadCustomUrl()" ng-disabled="!vm.customUrl">
+                                <i class="fas fa-download"></i> 加载
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 当前测试文件信息 -->
+            <section class="file-info" ng-if="vm.currentFile">
+                <div class="info-card">
+                    <h3><i class="fas fa-info-circle"></i> 当前测试文件</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="label">文件名:</span>
+                            <span class="value">{{vm.currentFile.name}}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">文件大小:</span>
+                            <span class="value">{{vm.currentFile.size}}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">测试状态:</span>
+                            <span class="value">{{vm.testStatus}}</span>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-secondary" ng-click="vm.clearTest()">
+                            <i class="fas fa-times"></i> 清除测试
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 左右分区的测试结果区域 -->
+            <section class="test-results" ng-if="vm.currentFile">
+                <div class="results-container">
+                    <!-- 左侧：PCAP-Element 解析结果 -->
+                    <div class="left-panel">
+                        <div class="panel-header">
+                            <h3><i class="fas fa-chart-bar"></i> PCAP-Element 解析结果</h3>
+                        </div>
+                        <div class="pcap-container">
+                            <pcap-element 
+                                id="pcapViewer"
+                                ng-src="{{vm.currentFile.url}}"
+                                lang="zh-cn">
+                            </pcap-element>
+                        </div>
+                    </div>
+
+                    <!-- 右侧：对比信息 -->
+                    <div class="right-panel">
+                        <div class="panel-header">
+                            <h3><i class="fas fa-vial"></i> 测试对比信息</h3>
+                        </div>
+                        <div class="comparison-container">
+                            <!-- 库信息 -->
+                            <div class="info-section">
+                                <h4><i class="fas fa-info-circle"></i> 库信息</h4>
+                                <div class="info-list">
+                                    <div class="info-row">
+                                        <span class="label">库名称:</span>
+                                        <span class="value">pcap-element</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="label">版本:</span>
+                                        <span class="value">1.0.0</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="label">加载状态:</span>
+                                        <span class="value" ng-class="{'success': vm.libraryLoaded, 'error': !vm.libraryLoaded}">
+                                            {{vm.libraryLoaded ? '已加载' : '未加载'}}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 文件信息 -->
+                            <div class="info-section">
+                                <h4><i class="fas fa-file"></i> 文件信息</h4>
+                                <div class="info-list">
+                                    <div class="info-row">
+                                        <span class="label">文件名:</span>
+                                        <span class="value">{{vm.currentFile.name}}</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="label">文件大小:</span>
+                                        <span class="value">{{vm.currentFile.size}}</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="label">文件类型:</span>
+                                        <span class="value">PCAP</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="label">访问URL:</span>
+                                        <span class="value">{{vm.currentFile.url}}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 测试状态 -->
+                            <div class="info-section">
+                                <h4><i class="fas fa-tasks"></i> 测试状态</h4>
+                                <div class="info-list">
+                                    <div class="info-row">
+                                        <span class="label">当前状态:</span>
+                                        <span class="value">{{vm.testStatus}}</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="label">开始时间:</span>
+                                        <span class="value">{{vm.testStartTime || 'N/A'}}</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="label">解析时间:</span>
+                                        <span class="value">{{vm.parseTime || 'N/A'}}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 功能支持 -->
+                            <div class="info-section">
+                                <h4><i class="fas fa-check-circle"></i> 功能支持</h4>
+                                <div class="feature-list">
+                                    <div class="feature-item">
+                                        <i class="fas fa-check success"></i>
+                                        <span>PCAP 文件解析</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check success"></i>
+                                        <span>数据包列表显示</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check success"></i>
+                                        <span>多协议支持 (TCP/UDP/ICMP/SMTP/ARP/IPv6)</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check success"></i>
+                                        <span>现代化UI界面</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check success"></i>
+                                        <span>URL方式加载</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 错误信息 -->
+                            <div class="info-section" ng-if="vm.error">
+                                <h4><i class="fas fa-exclamation-triangle"></i> 错误信息</h4>
+                                <div class="error-message">
+                                    <span>{{vm.error}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 错误提示 -->
+            <div class="error-message" ng-if="vm.error">
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>{{vm.error}}</span>
+                </div>
+            </div>
+        </main>
+
+        <footer class="app-footer">
+            <p>&copy; 2024 PCAP-Element 测试应用 - 基于 AngularJS 1.8</p>
+        </footer>
+    </div>
+
+    <!-- 脚本引用 -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+    <!-- pcap-element 库 -->
+    <script type="module" src="../../dist/pcap-element.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/controllers/pcapController.js"></script>
+    <script src="js/filters/bytesFilter.js"></script>
 </body>
 </html> 
