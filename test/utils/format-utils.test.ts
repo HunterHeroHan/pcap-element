@@ -1,4 +1,4 @@
-import { FormatUtils } from './format-utils';
+import { FormatUtils } from '../../src/utils/format-utils';
 
 describe('FormatUtils', () => {
   test('formatBytes should format bytes correctly', () => {

@@ -1,4 +1,4 @@
-import './pcap-element';
+import '../src/pcap-element';
 
 describe('PcapElement', () => {
   test('should show error if no src attribute', async () => {
