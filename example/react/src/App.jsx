@@ -1,4 +1,4 @@
-import 'pcap-element/dist/pcap-element.js';
+import 'pcap-element/dist/pcap-element.esm.min.js';
 import 'pcap-element/dist/styles.css';
 
 export default function App() {

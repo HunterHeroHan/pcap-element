@@ -17,7 +17,7 @@ npm start
 - 直接在 React 组件中引入 `pcap-element`：
 
 ```jsx
-import 'pcap-element/dist/pcap-element.js';
+import 'pcap-element/dist/pcap-element.esm.min.js';
 import 'pcap-element/dist/styles.css';
 
 export default function App() {

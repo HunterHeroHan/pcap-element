@@ -44,7 +44,10 @@ export class PcapParser {
       offset += this.PACKET_HEADER_SIZE + packetLength;
       if (packetLength === 0) break;
     }
-    return generateSummary(packets);
+    const summaryData = generateSummary(packets);
+    // 新增：整个文件的十六进制字符串
+    const fullHex = FormatUtils.arrayToHexString(buffer);
+    return { ...summaryData, fullHex };
   }
 
   /**

@@ -16,7 +16,10 @@
     "destinationAddress": "目的地址",
     "length": "长度",
     "protocol": "协议",
-    "bytes": "字节"
+    "bytes": "字节",
+    "showHex": "显示16进制",
+    "showParsed": "显示解析",
+    "formatToggle": "格式切换"
   },
   "en-us": {
     "loading": "Loading PCAP data...",
@@ -35,6 +38,9 @@
     "destinationAddress": "Destination",
     "length": "Length",
     "protocol": "Protocol",
-    "bytes": "bytes"
+    "bytes": "bytes",
+    "showHex": "Show Hex",
+    "showParsed": "Show Parsed",
+    "formatToggle": "Format Toggle"
   }
 } 

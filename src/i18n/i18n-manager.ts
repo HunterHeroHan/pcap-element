@@ -12,8 +12,6 @@ export class I18nManager {
   private languages: Languages | null = null;
   // 当前语言
   private currentLang: keyof Languages = 'zh-cn';
-  // 语言加载Promise，防止重复加载
-  private loadPromise: Promise<Languages> | null = null;
 
   // 私有构造函数，禁止外部实例化
   private constructor() {}
@@ -36,27 +34,9 @@ export class I18nManager {
     if (this.languages) {
       return this.languages;
     }
-    if (this.loadPromise) {
-      return this.loadPromise;
-    }
-    this.loadPromise = this.fetchLanguages(); // 开始加载
-    this.languages = await this.loadPromise;
+    // 直接使用默认语言配置，避免外部文件依赖
+    this.languages = this.getDefaultLanguages();
     return this.languages;
-  }
-
-  // 实际从服务器获取语言配置
-  private async fetchLanguages(): Promise<Languages> {
-    try {
-      const response = await fetch('/i18n/languages.json');
-      if (!response.ok) {
-        throw new Error(`Failed to load languages: ${response.status}`);
-      }
-      return await response.json();
-    } catch (error) {
-      console.error('Failed to load language configuration:', error);
-      // 加载失败时返回默认配置
-      return this.getDefaultLanguages();
-    }
   }
 
   // 默认语言配置（中英文）
@@ -79,7 +59,12 @@ export class I18nManager {
         destinationAddress: '目的地址',
         length: '长度',
         protocol: '协议',
-        bytes: '字节'
+        bytes: '字节',
+        showHex: '显示16进制',
+        showParsed: '显示解析',
+        formatToggle: '格式切换',
+        hexViewTitle: '原始16进制视图',
+        noPackets: '无数据包'
       },
       'en-us': {
         loading: 'Loading PCAP data...',
@@ -98,7 +83,12 @@ export class I18nManager {
         destinationAddress: 'Destination',
         length: 'Length',
         protocol: 'Protocol',
-        bytes: 'bytes'
+        bytes: 'bytes',
+        showHex: 'Show Hex',
+        showParsed: 'Show Parsed',
+        formatToggle: 'Format Toggle',
+        hexViewTitle: 'Raw Hex View',
+        noPackets: 'No packets'
       }
     };
   }

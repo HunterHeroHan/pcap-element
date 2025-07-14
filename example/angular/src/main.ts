@@ -1,4 +1,4 @@
-import 'pcap-element/dist/pcap-element.js';
+import 'pcap-element/dist/pcap-element.esm.min.js';
 import 'pcap-element/dist/styles.css';
 
 // 这里通常会有 Angular 的 bootstrap 逻辑，简化为静态页面示例

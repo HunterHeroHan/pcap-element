@@ -25,25 +25,25 @@
                 { 
                     name: 'session.pcap', 
                     size: '719KB', 
-                    url: '/example/angularjs/sample-data/session.pcap',
+                    url: '/sample-data/session.pcap',
                     description: '包含多个会话的数据包 (7372个数据包)'
                 },
                 { 
                     name: 'http-packets.pcap', 
                     size: '2.6MB', 
-                    url: '/example/angularjs/sample-data/http-packets.pcap',
+                    url: '/sample-data/http-packets.pcap',
                     description: 'HTTP流量数据包 (大文件)'
                 },
                 { 
                     name: 'frag_http_req.pcap', 
                     size: '2.0KB', 
-                    url: '/example/angularjs/sample-data/frag_http_req.pcap',
+                    url: '/sample-data/frag_http_req.pcap',
                     description: '分片HTTP请求 (13个数据包)'
                 },
                 { 
                     name: 'smtp.pcap', 
                     size: '27KB', 
-                    url: '/example/angularjs/sample-data/smtp.pcap',
+                    url: '/sample-data/smtp.pcap',
                     description: 'SMTP邮件协议数据包 (888个数据包)'
                 }
             ];

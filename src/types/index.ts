@@ -25,13 +25,14 @@ export interface PcapData {
     topSources: Array<{address: string, count: number}>; // 活跃源地址
     topDestinations: Array<{address: string, count: number}>; // 活跃目的地址
   };
+  fullHex?: string; // 整个文件的十六进制字符串
 }
 
 // 国际化相关类型定义
 /**
  * 国际化文本key类型
  */
-export type LanguageKey = 'loading' | 'errorNoSrc' | 'errorLoadFailed' | 'summary' | 'totalPackets' | 'totalBytes' | 'protocolTypes' | 'protocolDistribution' | 'topSources' | 'topDestinations' | 'packetList' | 'packet' | 'sourceAddress' | 'destinationAddress' | 'length' | 'protocol' | 'bytes';
+export type LanguageKey = 'loading' | 'errorNoSrc' | 'errorLoadFailed' | 'summary' | 'totalPackets' | 'totalBytes' | 'protocolTypes' | 'protocolDistribution' | 'topSources' | 'topDestinations' | 'packetList' | 'packet' | 'sourceAddress' | 'destinationAddress' | 'length' | 'protocol' | 'bytes' | 'showHex' | 'showParsed' | 'formatToggle' | 'hexViewTitle' | 'noPackets';
 
 /**
  * 单种语言的文本配置

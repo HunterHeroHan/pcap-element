@@ -21,7 +21,7 @@ npm start
   <pcap-element src="/your-file.pcap"></pcap-element>
 </template>
 <script setup>
-import 'pcap-element/dist/pcap-element.js'
+import 'pcap-element/dist/pcap-element.esm.min.js'
 import 'pcap-element/dist/styles.css'
 </script>
 ``` 

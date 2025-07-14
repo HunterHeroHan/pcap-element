@@ -2,6 +2,7 @@ import resolve from '@rollup/plugin-node-resolve';
 import typescript from '@rollup/plugin-typescript';
 import scss from 'rollup-plugin-scss';
 import terser from '@rollup/plugin-terser';
+import copy from 'rollup-plugin-copy';
 
 export default [
   // ESM 构建
@@ -13,12 +14,25 @@ export default [
       sourcemap: false,
     },
     plugins: [
-      resolve(),
-      typescript({ tsconfig: './tsconfig.json', declaration: false }),
+      resolve({
+        browser: true,
+        preferBuiltins: false
+      }),
+      typescript({ 
+        tsconfig: './tsconfig.json', 
+        declaration: false,
+        sourceMap: false
+      }),
       scss({
         include: ['src/styles.css'],
         output: 'dist/styles.css',
         outputStyle: 'compressed',
+        watch: false,
+      }),
+      copy({
+        targets: [
+          { src: 'src/styles.css', dest: 'dist' }
+        ]
       }),
       terser(),
     ],
@@ -34,12 +48,25 @@ export default [
       sourcemap: false,
     },
     plugins: [
-      resolve(),
-      typescript({ tsconfig: './tsconfig.json', declaration: false }),
+      resolve({
+        browser: true,
+        preferBuiltins: false
+      }),
+      typescript({ 
+        tsconfig: './tsconfig.json', 
+        declaration: false,
+        sourceMap: false
+      }),
       scss({
         include: ['src/styles.css'],
         output: 'dist/styles.css',
         outputStyle: 'compressed',
+        watch: false,
+      }),
+      copy({
+        targets: [
+          { src: 'src/styles.css', dest: 'dist' }
+        ]
       }),
       terser(),
     ],

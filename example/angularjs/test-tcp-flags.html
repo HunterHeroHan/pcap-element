@@ -238,7 +238,8 @@
                 const arrayBuffer = await response.arrayBuffer();
                 
                 // 尝试解析
-                const { PcapParser } = await import('node_modules/pcap-element/dist/pcap-element-lib.js');
+                // 注意：新版本已将所有功能打包到主文件中，不再支持单独导入子模块
+// const { PcapParser } = await import('../../dist/pcap-element.esm.min.js');
                 
                 try {
                     const result = PcapParser.parsePcapFile(arrayBuffer);
