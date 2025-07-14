@@ -3,8 +3,12 @@
   "version": "2.1.0",
   "description": "A reusable Web Component for PCAP file preview",
   "type": "module",
-  "main": "dist/pcap-element.js",
-  "module": "dist/pcap-element.js",
+  "main": "dist/pcap-element.esm.min.js",
+  "module": "dist/pcap-element.esm.min.js",
+  "exports": {
+    "import": "./dist/pcap-element.esm.min.js",
+    "require": "./dist/pcap-element.umd.min.js"
+  },
   "types": "dist/pcap-element.d.ts",
   "files": [
     "dist"

@@ -40,6 +40,8 @@ A reusable Web Component `<pcap-element>` for previewing and analyzing PCAP netw
 npm install pcap-element
 ```
 
+> 2.2.0及以后版本，npm包默认入口为ESM构建（dist/pcap-element.esm.min.js）。如需CommonJS/UMD环境支持，请手动引用dist/pcap-element.umd.min.js。
+
 ## 🚀 快速上手 | Quick Start
 
 ### 1. 在你的入口文件引入组件 | Import in your entry file

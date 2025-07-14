@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html lang="zh-CN" ng-app="pcapApp">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PCAP-Element 测试应用</title>
     <link rel="stylesheet" href="styles/main.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-        <script type="module" src="node_modules/pcap-element/dist/pcap-element.esm.min.js"></script>
+    <script type="module" src="node_modules/pcap-element/dist/pcap-element.esm.min.js"></script>
 </head>
+
 <body ng-controller="PcapController as vm">
     <div class="container">
         <header class="app-header">
@@ -21,7 +23,7 @@
                 <div class="sample-card">
                     <h3><i class="fas fa-list"></i> 文件选择测试</h3>
                     <p>选择示例文件或输入URL进行 pcap-element 库测试：</p>
-                    
+
                     <!-- 示例文件选择 -->
                     <div class="file-select-section">
                         <h4><i class="fas fa-folder"></i> 示例文件</h4>
@@ -32,7 +34,8 @@
                                     {{file.name}} - {{file.size}} - {{file.description}}
                                 </option>
                             </select>
-                            <button class="btn btn-primary" ng-click="vm.loadSelectedFile()" ng-disabled="!vm.selectedSampleFile">
+                            <button class="btn btn-primary" ng-click="vm.loadSelectedFile()"
+                                ng-disabled="!vm.selectedSampleFile">
                                 <i class="fas fa-play"></i> 测试
                             </button>
                         </div>
@@ -42,10 +45,8 @@
                     <div class="url-input-section">
                         <h4><i class="fas fa-link"></i> 自定义URL</h4>
                         <div class="url-container">
-                            <input type="text" 
-                                   ng-model="vm.customUrl" 
-                                   placeholder="输入PCAP文件URL，例如: https://example.com/file.pcap"
-                                   class="url-input">
+                            <input type="text" ng-model="vm.customUrl"
+                                placeholder="输入PCAP文件URL，例如: https://example.com/file.pcap" class="url-input">
                             <button class="btn btn-secondary" ng-click="vm.loadCustomUrl()" ng-disabled="!vm.customUrl">
                                 <i class="fas fa-download"></i> 加载
                             </button>
@@ -89,11 +90,7 @@
                             <h3><i class="fas fa-chart-bar"></i> PCAP-Element 解析结果</h3>
                         </div>
                         <div class="pcap-container">
-                            <pcap-element 
-                                id="pcapViewer"
-                                ng-src="{{vm.currentFile.url}}"
-                                show-hex="true"
-                                lang="zh-cn">
+                            <pcap-element id="pcapViewer" src="{{vm.currentFile.url}}" show-hex="true" lang="zh-cn">
                             </pcap-element>
                         </div>
                     </div>
@@ -118,7 +115,8 @@
                                     </div>
                                     <div class="info-row">
                                         <span class="label">加载状态:</span>
-                                        <span class="value" ng-class="{'success': vm.libraryLoaded, 'error': !vm.libraryLoaded}">
+                                        <span class="value"
+                                            ng-class="{'success': vm.libraryLoaded, 'error': !vm.libraryLoaded}">
                                             {{vm.libraryLoaded ? '已加载' : '未加载'}}
                                         </span>
                                     </div>
@@ -227,4 +225,5 @@
     <script src="js/controllers/pcapController.js"></script>
     <script src="js/filters/bytesFilter.js"></script>
 </body>
-</html> 
+
+</html>
