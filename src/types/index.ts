@@ -32,7 +32,7 @@ export interface PcapData {
 /**
  * 国际化文本key类型
  */
-export type LanguageKey = 'loading' | 'errorNoSrc' | 'errorLoadFailed' | 'summary' | 'totalPackets' | 'totalBytes' | 'protocolTypes' | 'protocolDistribution' | 'topSources' | 'topDestinations' | 'packetList' | 'packet' | 'sourceAddress' | 'destinationAddress' | 'length' | 'protocol' | 'bytes' | 'showHex' | 'showParsed' | 'formatToggle' | 'hexViewTitle' | 'noPackets';
+export type LanguageKey = string;
 
 /**
  * 单种语言的文本配置
