@@ -272,6 +272,7 @@ body {
     margin-top: 15px;
     display: flex;
     gap: 8px;
+    flex-wrap: wrap;
 }
 
 /* 错误消息 */
@@ -546,4 +547,63 @@ body {
     .comparison-container {
         max-height: 400px;
     }
+}
+
+/* 备用显示样式 */
+.fallback-display {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 10px 0;
+}
+
+.fallback-content {
+    text-align: center;
+}
+
+.fallback-content i {
+    font-size: 3rem;
+    color: #f39c12;
+    margin-bottom: 15px;
+}
+
+.fallback-content h4 {
+    color: #d68910;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+}
+
+.fallback-content p {
+    color: #6c5ce7;
+    margin-bottom: 10px;
+}
+
+.fallback-content ul {
+    text-align: left;
+    max-width: 400px;
+    margin: 15px auto;
+    color: #6c5ce7;
+}
+
+.fallback-content li {
+    margin-bottom: 5px;
+}
+
+.file-info-fallback {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 15px;
+    margin-top: 20px;
+    text-align: left;
+}
+
+.file-info-fallback p {
+    margin-bottom: 5px;
+    color: #495057;
+}
+
+.file-info-fallback strong {
+    color: #212529;
 } 

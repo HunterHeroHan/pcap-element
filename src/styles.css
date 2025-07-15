@@ -175,8 +175,13 @@
 }
 
 .packet:hover {
-  /* 鼠标悬停高亮 */
-  background-color: #f8fafc !important;
+  /* 鼠标悬停高亮 - 区分奇偶行 */
+  background-color: #e5e7eb !important;
+}
+
+.packet.odd:hover {
+  /* 奇数行悬停时用更深的颜色 */
+  background-color: #d1d5db !important;
 }
 
 .packet-divider {

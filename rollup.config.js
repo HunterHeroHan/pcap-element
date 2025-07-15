@@ -3,6 +3,7 @@ import typescript from '@rollup/plugin-typescript';
 import scss from 'rollup-plugin-scss';
 import terser from '@rollup/plugin-terser';
 import copy from 'rollup-plugin-copy';
+import json from '@rollup/plugin-json';
 
 export default [
   // ESM 构建
@@ -34,6 +35,7 @@ export default [
           { src: 'src/styles.css', dest: 'dist' }
         ]
       }),
+      json(),
       terser(),
     ],
     external: [],
@@ -68,6 +70,7 @@ export default [
           { src: 'src/styles.css', dest: 'dist' }
         ]
       }),
+      json(),
       terser(),
     ],
     external: [],

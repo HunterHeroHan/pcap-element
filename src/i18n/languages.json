@@ -19,7 +19,9 @@
     "bytes": "字节",
     "showHex": "显示16进制",
     "showParsed": "显示解析",
-    "formatToggle": "格式切换"
+    "formatToggle": "格式切换",
+    "hexViewTitle": "原始16进制视图",
+    "noPackets": "无数据包"
   },
   "en-us": {
     "loading": "Loading PCAP data...",
@@ -41,6 +43,8 @@
     "bytes": "bytes",
     "showHex": "Show Hex",
     "showParsed": "Show Parsed",
-    "formatToggle": "Format Toggle"
+    "formatToggle": "Format Toggle",
+    "hexViewTitle": "Raw Hex View",
+    "noPackets": "No packets"
   }
 } 
