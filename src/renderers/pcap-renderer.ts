@@ -57,25 +57,25 @@ export class PcapRenderer {
     const safeKeysLength = (obj: Record<string, unknown> | null | undefined): number => {
       return obj ? Object.keys(obj).length : 0;
     };
-  
+
     // 工具函数：生成地址列表字符串
     const formatAddressList = (list: Array<{ address: string; count: number }> | null | undefined): string => {
       if (!list || list.length === 0) return '';
       return list.slice(0, 3).map(item => `${this.escapeHtml(item.address)} (${item.count})`).join(', ');
     };
-  
+
     // 数据准备
     const totalPackets = data.summary.totalPackets ?? 0;
     const totalBytes = this.formatBytes(data.summary.totalBytes ?? 0);
     const protocolCount = safeKeysLength(data.summary.protocols);
-  
+
     const protocolDistribution = Object.entries(data.summary.protocols ?? {})
       .map(([protocol, count]) => `${this.escapeHtml(protocol)}: ${count}`)
       .join(', ');
-  
+
     const topSources = formatAddressList(data.summary.topSources);
     const topDestinations = formatAddressList(data.summary.topDestinations);
-  
+
     return `
       <div class="summary">
         <h3>${this.escapeHtml(texts.summary)}</h3>
@@ -117,16 +117,16 @@ export class PcapRenderer {
       <div class="packets">
         <h3>${this.escapeHtml(texts.packetList)} (${data.packets.length})</h3>
         ${data.packets.map((packet, index) => {
-          const protocolLower = packet.protocol.toLowerCase();
-          const timestamp = new Date(packet.timestamp * 1000).toISOString();
-          const isEven = index % 2 === 0;
-          
-          // 根据显示模式渲染数据包内容
-          const packetContent = displayMode === 'hex' 
-            ? this.renderHexPacket(packet, texts)
-            : this.renderParsedPacket(packet, texts);
-          
-          return `
+      const protocolLower = packet.protocol.toLowerCase();
+      const timestamp = new Date(packet.timestamp * 1000).toISOString();
+      const isEven = index % 2 === 0;
+
+      // 根据显示模式渲染数据包内容
+      const packetContent = displayMode === 'hex'
+        ? this.renderHexPacket(packet, texts)
+        : this.renderParsedPacket(packet, texts);
+
+      return `
             <div class="packet ${isEven ? 'even' : 'odd'}">
               <div class="packet-header">
                 <div class="packet-title">
@@ -139,7 +139,7 @@ export class PcapRenderer {
               ${index < data.packets.length - 1 ? '<div class="packet-divider"></div>' : ''}
             </div>
           `;
-        }).join('')}
+    }).join('')}
       </div>
     `;
   }
@@ -191,27 +191,43 @@ export class PcapRenderer {
   }
 
   /**
-   * 格式化16进制数据，每行16字节，带偏移地址
+   * 格式化16进制数据，每行16字节，带偏移地址和分组高亮HTML结构（分组间用三个空格，ASCII区|与内容同在一个span，末行ascii宽度补齐）
    */
   private formatHexData(hexString: string): string {
     const bytes = hexString.split(' ').filter(b => b.trim());
     const lines: string[] = [];
-    
     for (let i = 0; i < bytes.length; i += 16) {
       const lineBytes = bytes.slice(i, i + 16);
       const offset = i.toString(16).padStart(8, '0');
-      const hexPart = lineBytes.map(b => b.padStart(2, '0')).join(' ');
-      const asciiPart = lineBytes.map(b => {
-        const charCode = parseInt(b, 16);
-        return (charCode >= 32 && charCode <= 126) ? String.fromCharCode(charCode) : '.';
-      }).join('');
-      
+      // HEX区每8字节分组，组间插入三个空格
+      let hexStr = '';
+      for (let j = 0; j < lineBytes.length; j++) {
+        if (j > 0 && j % 8 === 0) {
+          hexStr += '   ';
+        }
+        hexStr += lineBytes[j].padStart(2, '0') + ' ';
+      }
       // 补齐16字节的显示
-      const padding = '   '.repeat(16 - lineBytes.length);
-      lines.push(`${offset}: ${hexPart}${padding} |${asciiPart}|`);
+      hexStr += '   '.repeat(16 - lineBytes.length);
+      // ASCII区，末行不足16字节时补空格
+      let asciiStr = lineBytes.map(b => {
+        const charCode = parseInt(b, 16);
+        const ch = (charCode >= 32 && charCode <= 126) ? String.fromCharCode(charCode) : '.';
+        return this.escapeHtml(ch);
+      }).join('');
+      if (lineBytes.length < 16) {
+        asciiStr += ' '.repeat(16 - lineBytes.length);
+      }
+      // 组装一行
+      lines.push(
+        `<div class="hex-line">
+          <span class="hex-offset">${offset}:</span>
+          <span class="hex-bytes">${hexStr}</span>
+          <span class="hex-ascii">| ${asciiStr} |</span>
+        </div>`
+      );
     }
-    
-    return lines.join('\n');
+    return lines.join('');
   }
 
   /**
