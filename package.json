@@ -1,6 +1,6 @@
 {
   "name": "pcap-element",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "A reusable Web Component for PCAP file preview",
   "type": "module",
   "main": "dist/pcap-element.esm.min.js",
