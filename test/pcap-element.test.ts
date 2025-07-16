@@ -1,4 +1,28 @@
 import '../src/pcap-element';
+import './utils/pcap-parser.test';
+
+beforeAll(() => {
+  // 构造合法PCAP头部（24字节，magic number）
+  const validPcapHeader = new Uint8Array(24);
+  new DataView(validPcapHeader.buffer).setUint32(0, 0xa1b2c3d4, false);
+  global.fetch = jest.fn(() => Promise.resolve({
+    ok: true,
+    status: 200,
+    statusText: 'OK',
+    headers: new Headers(),
+    redirected: false,
+    type: 'basic',
+    url: '',
+    clone: () => ({} as Response),
+    body: null,
+    bodyUsed: false,
+    arrayBuffer: () => Promise.resolve(validPcapHeader.buffer),
+    json: () => Promise.resolve({}),
+    text: () => Promise.resolve(''),
+    formData: () => Promise.resolve(new FormData()),
+    blob: () => Promise.resolve(new Blob()),
+  } as unknown as Response));
+});
 
 describe('PcapElement', () => {
   test('should show error if no src attribute', async () => {

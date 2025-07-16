@@ -184,13 +184,11 @@ export class PcapParser {
    */
   private static parseTcpFlags(flags: number): TcpFlag[] {
     // 确保flags是有效的字节值（0-255）
-    if (typeof flags !== 'number' || !Number.isFinite(flags)) {
+    if (typeof flags !== 'number' || !Number.isFinite(flags) || flags < 0 || flags > 255) {
       return [];
     }
-    
-    // 将flags限制在0-255范围内，然后只取低6位作为TCP标志位
-    const validFlags = (flags & 0xFF) & 0x3F; // 0x3F = 0b111111，只取低6位
-    
+    // 只取低6位作为TCP标志位
+    const validFlags = flags & 0x3F; // 0x3F = 0b111111
     const activeFlags: TcpFlag[] = [];
     for (let i = 0; i < TCP_FLAG_NAMES.length; i++) {
       if (validFlags & (1 << i)) {
