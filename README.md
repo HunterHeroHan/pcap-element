@@ -61,7 +61,10 @@ import 'pcap-element/dist/pcap-element.esm.min.js';
 <pcap-element src="/your-file.pcap" lang="en-us"></pcap-element>
 
 <!-- 启用切换按钮（可切换16进制/解析模式） -->
-<pcap-element src="/your-file.pcap" show-hex="true"></pcap-element>
+<pcap-element src="/your-file.pcap" enableHexToggle></pcap-element>
+
+<!-- 启用全屏按钮 -->
+<pcap-element src="/your-file.pcap" showFullscreenBtn></pcap-element>
 ```
 
 ### 3. 支持CDN方式 | CDN Usage
@@ -81,7 +84,8 @@ import 'pcap-element/dist/pcap-element.esm.min.js';
 |------|--------|--------|----------------------|
 | src  | string | -      | PCAP文件的URL或路径  |
 | lang | string | zh-cn  | 语言（支持zh-cn, en-us）|
-| show-hex | string | false | 是否显示切换按钮（true/false，控制能否切换16进制/解析模式）|
+| enableHexToggle | boolean | false | 是否显示切换按钮（布尔属性，控制能否切换16进制/解析模式）|
+| showFullscreenBtn | boolean | false | 是否显示全屏按钮（布尔属性，显示右上角全屏/恢复按钮）|
 
 ### 事件 | Events
 
@@ -141,7 +145,11 @@ import type { PcapPacket, PcapData } from 'pcap-element/dist/pcap-element.d.ts';
 
 ### 5. 如何切换显示模式？
 
-- 使用`show-hex`属性：`show-hex="true"`显示切换按钮，允许用户切换16进制/解析模式；不加或为false时始终为解析模式
+- 使用`enableHexToggle`属性：`enableHexToggle`显示切换按钮，允许用户切换16进制/解析模式；不加时始终为解析模式
+
+6. 如何显示全屏按钮？
+
+- 使用`showFullscreenBtn`属性：`showFullscreenBtn`显示右上角全屏/恢复按钮，点击可切换全屏和普通模式
 
 ## 🤝 贡献 | Contributing
 
@@ -204,7 +212,10 @@ import 'pcap-element/dist/pcap-element.esm.min.js';
 <pcap-element src="/your-file.pcap" lang="en-us"></pcap-element>
 
 <!-- Enable toggle button (switch between hex/parsed) -->
-<pcap-element src="/your-file.pcap" show-hex="true"></pcap-element>
+<pcap-element src="/your-file.pcap" enableHexToggle></pcap-element>
+
+<!-- Enable fullscreen button -->
+<pcap-element src="/your-file.pcap" showFullscreenBtn></pcap-element>
 ```
 
 3 Or via CDN:
@@ -224,7 +235,8 @@ import 'pcap-element/dist/pcap-element.esm.min.js';
 |------|--------|---------|----------------------------|
 | src  | string | -       | URL or path to PCAP file   |
 | lang | string | zh-cn   | Language (supports zh-cn, en-us) |
-| show-hex | string | false | Show toggle button (true/false, controls if user can switch hex/parsed mode) |
+| enableHexToggle | boolean | false | Show toggle button (boolean attribute, controls if user can switch hex/parsed mode) |
+| showFullscreenBtn | boolean | false | Show fullscreen button (boolean attribute, shows fullscreen/exit button at top right) |
 
 ### Events
 
@@ -266,8 +278,12 @@ import type { PcapPacket, PcapData } from 'pcap-element/dist/pcap-element.d.ts';
    - Import js file in your entry and use `<pcap-element>` as a normal HTML tag
 4. Why no CSS file needed?
    - Styles are built-in to avoid external dependencies and 404 errors
-5. How to switch display modes?
-   - Use `show-hex` attribute: `show-hex="true"` to enable toggle button, allowing user to switch hex/parsed mode; omit or set to false for always parsed mode
+5. How to switch display mode?
+   - Use the `enableHexToggle` attribute: `enableHexToggle` shows the toggle button, allowing users to switch between hex/parsed mode. If not set, always parsed mode.
+
+6. How to show the fullscreen button?
+
+- Use the `showFullscreenBtn` attribute: `showFullscreenBtn` shows the fullscreen/exit button at the top right, allowing users to toggle fullscreen mode.
 
 ## Contributing
 

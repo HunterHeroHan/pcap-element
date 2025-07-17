@@ -28,6 +28,9 @@ export class PcapElement extends HTMLElement {
   private cachedPcapData: PcapData | null = null;
   // 是否已注入样式
   private stylesInjected: boolean = false;
+  private fullscreen: boolean = false;
+  private showFullscreenBtn: boolean = false;
+  private fullscreenButton?: HTMLButtonElement;
 
   constructor() {
     super();
@@ -50,12 +53,29 @@ export class PcapElement extends HTMLElement {
 
   // 监听的属性列表，src为数据源，lang为语言，show-hex为是否显示16进制
   static get observedAttributes() {
-    return ['src', 'lang', 'show-hex'];
+    return ['src', 'lang', 'enableHexToggle', 'showfullscreenbtn'];
+  }
+
+  get showFullscreen() {
+    return this.fullscreen;
+  }
+  set showFullscreen(val: boolean) {
+    this.fullscreen = val;
+    this.updateFullscreenState();
+    this.updateFullscreenButton();
+  }
+  get showFullscreenBtnProp() {
+    return this.showFullscreenBtn;
+  }
+  set showFullscreenBtnProp(val: boolean) {
+    this.showFullscreenBtn = val;
+    this.updateFullscreenButton();
   }
 
   // 判断是否应显示切换按钮
   private shouldShowToggleButton(): boolean {
-    return this.getAttribute('show-hex') === 'true';
+    // enableHexToggle为布尔属性，存在即为true
+    return this.hasAttribute('enableHexToggle') && this.getAttribute('enableHexToggle') !== 'false';
   }
 
   // 设置当前显示模式
@@ -89,11 +109,14 @@ export class PcapElement extends HTMLElement {
     } else if (name === 'lang' && oldValue !== newValue) {
       this.updateLanguage();
       await this.loadPcapData();
-    } else if (name === 'show-hex' && oldValue !== newValue) {
+    } else if (name === 'enableHexToggle' && oldValue !== newValue) {
       this.setDisplayMode('parsed');
       if (this.cachedPcapData) {
         await this.renderPcapData(this.cachedPcapData);
       }
+    } else if (name === 'showfullscreenbtn' && oldValue !== newValue) {
+      this.showFullscreenBtn = newValue !== null && newValue !== 'false';
+      this.updateFullscreenButton();
     }
   }
 
@@ -164,8 +187,8 @@ export class PcapElement extends HTMLElement {
       }
       .format-toggle {
         position: absolute;
-        top: 8px;
-        right: 8px;
+        top: 6px;
+        right: 44px;
         background: #3b82f6;
         color: white;
         border: none;
@@ -177,6 +200,24 @@ export class PcapElement extends HTMLElement {
         transition: background-color 0.2s ease;
         z-index: 10;
         font-family: inherit;
+        width: auto;
+        height: 28px;
+        vertical-align: middle;
+      }
+      .fullscreen-toggle {
+        position: absolute;
+        top: 6px;
+        right: 8px;
+        z-index: 20;
+        background: #eee;
+        border: none;
+        border-radius: 4px;
+        margin-left: 6px;
+        cursor: pointer;
+        vertical-align: middle;
+        width: 28px;
+        height: 28px;
+        display: inline-block;
       }
       .format-toggle:hover { background: #2563eb; }
       .format-toggle:active { background: #1d4ed8; }
@@ -396,6 +437,18 @@ export class PcapElement extends HTMLElement {
       .content, .parsed-content, .hex-content {
         position: static;
       }
+      .fullscreen {
+        position: fixed !important;
+        top: 0; left: 0; right: 0; bottom: 0;
+        width: 100vw !important;
+        height: 100vh !important;
+        z-index: 9999 !important;
+        background: #fff !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: 0 0 0 9999px rgba(0,0,0,0.12);
+        overflow: auto !important;
+      }
       @media (max-width: 768px) {
         :host {
           padding: 8px;
@@ -422,12 +475,22 @@ export class PcapElement extends HTMLElement {
     this.toggleButton.style.display = 'none'; // 初始隐藏，加载数据后显示
     this.toggleButton.addEventListener('click', () => this.toggleDisplayMode());
     
+    // 新增全屏按钮
+    this.fullscreenButton = document.createElement('button');
+    this.fullscreenButton.className = 'fullscreen-toggle';
+    const texts = await this.i18nManager.getAllTexts();
+    this.fullscreenButton.title = texts ? (this.fullscreen ? texts.exitFullscreen : texts.fullscreen) : '';
+    this.updateFullscreenButtonIcon();
+    this.fullscreenButton.style.display = this.showFullscreenBtn ? 'inline-block' : 'none';
+    this.fullscreenButton.addEventListener('click', () => this.toggleFullscreen());
+    // 固定右上角，紧邻toggleButton右侧
     this.shadow.appendChild(this.loadingElement);
     this.shadow.appendChild(this.errorElement);
     this.shadow.appendChild(this.contentElement);
     this.shadow.appendChild(this.toggleButton);
-    // 初始化时确保内容区显示正确
+    this.shadow.appendChild(this.fullscreenButton);
     this.updateContentDisplayMode();
+    this.updateFullscreenButton();
   }
 
   // 切换显示模式
@@ -505,10 +568,9 @@ export class PcapElement extends HTMLElement {
   // 错误处理统一入口
   private async handleError(error: unknown) {
     let errorMessage = await this.getText('errorLoadFailed');
-  
-    // 避免暴露原始错误信息
-    console.error('Load PCAP failed:', error); // 记录详细日志
-    this.showError(errorMessage);
+    // 统一中文风格提示
+    console.error('加载PCAP失败:', error); // 记录详细日志
+    this.showError(errorMessage || '加载PCAP文件失败');
   }
 
   /**
@@ -559,8 +621,8 @@ export class PcapElement extends HTMLElement {
       this.toggleButton.style.display = 'none';
     }
   
-    // 设置错误信息
-    this.errorElement.textContent = message;
+    // 设置错误信息，中文风格
+    this.errorElement.textContent = message || '发生错误，请重试';
   }
   
   // 封装 display 设置逻辑，便于复用和扩展
@@ -586,7 +648,44 @@ export class PcapElement extends HTMLElement {
       console.error('渲染PCAP数据失败:', error);
       this.contentElement.style.display = 'none';
       this.errorElement.style.display = 'block';
-      this.errorElement.textContent = '加载数据时发生错误，请重试。';
+      this.errorElement.textContent = '加载数据时发生错误';
+    }
+  }
+
+  private toggleFullscreen() {
+    this.fullscreen = !this.fullscreen;
+    this.updateFullscreenState();
+    this.updateFullscreenButton();
+  }
+  private updateFullscreenState() {
+    // 兼容:host和shadow host
+    const host = this.shadow.host as HTMLElement;
+    if (this.fullscreen) {
+      this.classList.add('fullscreen');
+      if (host) host.classList.add('fullscreen');
+    } else {
+      this.classList.remove('fullscreen');
+      if (host) host.classList.remove('fullscreen');
+    }
+  }
+  private updateFullscreenButton() {
+    if (!this.fullscreenButton) return;
+    this.fullscreenButton.style.display = this.showFullscreenBtn ? 'inline-block' : 'none';
+    this.i18nManager.getAllTexts().then(texts => {
+      if (this.fullscreenButton && texts) {
+        this.fullscreenButton.title = this.fullscreen ? texts.exitFullscreen : texts.fullscreen;
+      }
+    });
+    this.updateFullscreenButtonIcon();
+  }
+  private updateFullscreenButtonIcon() {
+    if (!this.fullscreenButton) return;
+    if (this.fullscreen) {
+      // 恢复图标（两个对角箭头）
+      this.fullscreenButton.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16"><polyline points="4,12 4,8 8,8" stroke="#888" stroke-width="2" fill="none"/><polyline points="12,4 12,8 8,8" stroke="#888" stroke-width="2" fill="none"/></svg>';
+    } else {
+      // 非全屏：方框图标
+      this.fullscreenButton.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16"><rect x="3" y="3" width="10" height="10" rx="2" fill="none" stroke="#888" stroke-width="2"/></svg>';
     }
   }
 }
