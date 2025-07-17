@@ -93,19 +93,29 @@ export class PcapParser {
     const safeMicroSeconds = Math.min(Math.max(microSeconds, 0), 999999);
     const sourceMac = FormatUtils.formatMacAddress(data.slice(6, 12));
     const destMac = FormatUtils.formatMacAddress(data.slice(0, 6));
-    const etherType = (data[12] << 8) | data[13];
+    const etherTypeNum = (data[12] << 8) | data[13];
+    const etherType = '0x' + etherTypeNum.toString(16).padStart(4, '0');
     let protocol = 'Unknown';
     let transportSource = destMac;
     let transportDestination = sourceMac;
     let port: number | undefined;
     let flags: TcpFlag[] = [];
-    if (etherType === 0x8100 || etherType === 0x88a8) {
+    // 新增底层字段
+    let ipTtl: number | undefined, ipId: number | undefined, ipChecksum: string | undefined;
+    let tcpSeq: number | undefined, tcpAck: number | undefined, tcpWin: number | undefined, tcpChecksum: string | undefined;
+    let udpLen: number | undefined, udpChecksum: string | undefined;
+    if (etherTypeNum === 0x8100 || etherTypeNum === 0x88a8) {
       return null; // VLAN暂不支持
     }
-    if (etherType === 0x0800) {
+    if (etherTypeNum === 0x0800) {
       const ipHeaderStart = this.ETHERNET_HEADER_SIZE;
       if (data.length >= ipHeaderStart + this.IP_HEADER_MIN_SIZE) {
-        const ipPacket = this.parseIpPacket(data.subarray(ipHeaderStart));
+        const ipData = data.subarray(ipHeaderStart);
+        const ipProtocol = ipData[9];
+        ipTtl = ipData[8];
+        ipId = (ipData[4] << 8) | ipData[5];
+        ipChecksum = '0x' + ((ipData[10] << 8) | ipData[11]).toString(16).padStart(4, '0');
+        const ipPacket = this.parseIpPacket(ipData);
         if (ipPacket) {
           protocol = ipPacket.protocol;
           transportSource = ipPacket.source;
@@ -113,10 +123,23 @@ export class PcapParser {
           port = ipPacket.port;
           flags = ipPacket.flags ?? [];
         }
+        if (ipProtocol === 6 && ipData.length >= this.IP_HEADER_MIN_SIZE + this.TCP_HEADER_SIZE) {
+          // TCP
+          const tcpData = ipData.slice(this.IP_HEADER_MIN_SIZE);
+          tcpSeq = (((tcpData[4] << 24) | (tcpData[5] << 16) | (tcpData[6] << 8) | tcpData[7]) >>> 0);
+          tcpAck = (((tcpData[8] << 24) | (tcpData[9] << 16) | (tcpData[10] << 8) | tcpData[11]) >>> 0);
+          tcpWin = (tcpData[14] << 8) | tcpData[15];
+          tcpChecksum = '0x' + ((tcpData[16] << 8) | tcpData[17]).toString(16).padStart(4, '0');
+        } else if (ipProtocol === 17 && ipData.length >= this.IP_HEADER_MIN_SIZE + 8) {
+          // UDP
+          const udpData = ipData.slice(this.IP_HEADER_MIN_SIZE);
+          udpLen = (udpData[4] << 8) | udpData[5];
+          udpChecksum = '0x' + ((udpData[6] << 8) | udpData[7]).toString(16).padStart(4, '0');
+        }
       }
-    } else if (etherType === 0x0806) {
+    } else if (etherTypeNum === 0x0806) {
       protocol = 'ARP';
-    } else if (etherType === 0x86DD) {
+    } else if (etherTypeNum === 0x86DD) {
       protocol = 'IPv6';
     }
     return {
@@ -127,7 +150,19 @@ export class PcapParser {
       destination: transportDestination,
       protocol,
       port,
-      flags
+      flags,
+      srcMac: sourceMac,
+      dstMac: destMac,
+      etherType,
+      ipTtl,
+      ipId,
+      ipChecksum,
+      tcpSeq,
+      tcpAck,
+      tcpWin,
+      tcpChecksum,
+      udpLen,
+      udpChecksum
     };
   }
 

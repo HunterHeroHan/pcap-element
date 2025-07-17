@@ -11,6 +11,19 @@ export interface PcapPacket {
   protocol: string; // 协议类型（如TCP/UDP/ICMP等）
   port?: number; // 端口号（可选）
   flags?: string[]; // TCP标志位（可选）
+  // 新增底层字段
+  srcMac?: string; // 源MAC地址（格式：XX:XX:XX:XX:XX:XX）
+  dstMac?: string; // 目的MAC地址（格式：XX:XX:XX:XX:XX:XX）
+  etherType?: string; // 以太网类型（如0x0800）
+  ipTtl?: number; // IP TTL（生存时间）
+  ipId?: number; // IP标识符（ID）
+  ipChecksum?: string; // IP头部校验和（如0x1234）
+  tcpSeq?: number; // TCP序列号（无符号32位）
+  tcpAck?: number; // TCP确认号（无符号32位）
+  tcpWin?: number; // TCP窗口大小
+  tcpChecksum?: string; // TCP校验和（如0x1234）
+  udpLen?: number; // UDP长度（字节）
+  udpChecksum?: string; // UDP校验和（如0x1234）
 }
 
 /**

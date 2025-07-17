@@ -148,15 +148,36 @@ export class PcapRenderer {
    * 渲染解析模式的数据包
    */
   private renderParsedPacket(packet: PcapPacket, texts: Record<string, string>): string {
-    return `
+    // 基本信息
+    let html = `
       <div class="packet-info">
         <div><strong>${texts.sourceAddress}:</strong> ${this.escapeHtml(packet.source)}</div>
         <div><strong>${texts.destinationAddress}:</strong> ${this.escapeHtml(packet.destination)}</div>
         <div><strong>${texts.length}:</strong> ${packet.length} ${texts.bytes}</div>
         <div><strong>${texts.protocol}:</strong> ${packet.protocol}</div>
+        ${packet.port !== undefined ? `<div><strong>${texts.port}:</strong> ${packet.port}</div>` : ''}
+        ${packet.flags && packet.flags.length ? `<div><strong>${texts.flags}:</strong> ${packet.flags.join(', ')}</div>` : ''}
       </div>
-      <div class="packet-data">${this.escapeHtml(packet.data)}</div>
     `;
+    // 底层字段分组展示（label国际化）
+    const lowLevel: string[] = [];
+    if (packet.srcMac) lowLevel.push(`<div><strong>${texts.srcMac}:</strong> ${packet.srcMac}</div>`);
+    if (packet.dstMac) lowLevel.push(`<div><strong>${texts.dstMac}:</strong> ${packet.dstMac}</div>`);
+    if (packet.etherType) lowLevel.push(`<div><strong>${texts.etherType}:</strong> ${packet.etherType}</div>`);
+    if (packet.ipTtl !== undefined) lowLevel.push(`<div><strong>${texts.ipTtl}:</strong> ${packet.ipTtl}</div>`);
+    if (packet.ipId !== undefined) lowLevel.push(`<div><strong>${texts.ipId}:</strong> ${packet.ipId}</div>`);
+    if (packet.ipChecksum) lowLevel.push(`<div><strong>${texts.ipChecksum}:</strong> ${packet.ipChecksum}</div>`);
+    if (packet.tcpSeq !== undefined) lowLevel.push(`<div><strong>${texts.tcpSeq}:</strong> ${packet.tcpSeq}</div>`);
+    if (packet.tcpAck !== undefined) lowLevel.push(`<div><strong>${texts.tcpAck}:</strong> ${packet.tcpAck}</div>`);
+    if (packet.tcpWin !== undefined) lowLevel.push(`<div><strong>${texts.tcpWin}:</strong> ${packet.tcpWin}</div>`);
+    if (packet.tcpChecksum) lowLevel.push(`<div><strong>${texts.tcpChecksum}:</strong> ${packet.tcpChecksum}</div>`);
+    if (packet.udpLen !== undefined) lowLevel.push(`<div><strong>${texts.udpLen}:</strong> ${packet.udpLen}</div>`);
+    if (packet.udpChecksum) lowLevel.push(`<div><strong>${texts.udpChecksum}:</strong> ${packet.udpChecksum}</div>`);
+    if (lowLevel.length) {
+      html += `<div class="packet-info">${lowLevel.join('')}</div>`;
+    }
+    html += `<div class="packet-data">${this.escapeHtml(packet.data)}</div>`;
+    return html;
   }
 
   /**

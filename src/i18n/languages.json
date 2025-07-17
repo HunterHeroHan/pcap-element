@@ -21,7 +21,21 @@
     "showParsed": "显示解析",
     "formatToggle": "格式切换",
     "hexViewTitle": "原始16进制视图",
-    "noPackets": "无数据包"
+    "noPackets": "无数据包",
+    "srcMac": "源MAC地址",
+    "dstMac": "目的MAC地址",
+    "etherType": "以太网类型",
+    "ipTtl": "IP TTL",
+    "ipId": "IP标识符",
+    "ipChecksum": "IP校验和",
+    "tcpSeq": "TCP序列号",
+    "tcpAck": "TCP确认号",
+    "tcpWin": "TCP窗口",
+    "tcpChecksum": "TCP校验和",
+    "udpLen": "UDP长度",
+    "udpChecksum": "UDP校验和",
+    "port": "端口号",
+    "flags": "标志位"
   },
   "en-us": {
     "loading": "Loading PCAP data...",
@@ -45,6 +59,20 @@
     "showParsed": "Show Parsed",
     "formatToggle": "Format Toggle",
     "hexViewTitle": "Raw Hex View",
-    "noPackets": "No packets"
+    "noPackets": "No packets",
+    "srcMac": "Src MAC",
+    "dstMac": "Dst MAC",
+    "etherType": "EtherType",
+    "ipTtl": "IP TTL",
+    "ipId": "IP ID",
+    "ipChecksum": "IP Checksum",
+    "tcpSeq": "TCP Seq",
+    "tcpAck": "TCP Ack",
+    "tcpWin": "TCP Win",
+    "tcpChecksum": "TCP Checksum",
+    "udpLen": "UDP Len",
+    "udpChecksum": "UDP Checksum",
+    "port": "Port",
+    "flags": "Flags"
   }
 } 

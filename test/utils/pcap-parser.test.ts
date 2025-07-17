@@ -202,4 +202,78 @@ describe('PcapParser', () => {
     expect(PcapParser['parseTcpFlags'](null as unknown as number)).toEqual([]);
     expect(PcapParser['parseTcpFlags'](999999)).toEqual([]);
   });
+
+  test('should parse and expose low-level fields (MAC, EtherType, IP, TCP, UDP)', () => {
+    // 构造一个包含以太网、IP、TCP头的最小包
+    const buf = new Uint8Array(24 + 16 + 14 + 20 + 20);
+    new DataView(buf.buffer).setUint32(0, 0xa1b2c3d4, false);
+    new DataView(buf.buffer).setUint32(24, 1, true);
+    new DataView(buf.buffer).setUint32(28, 2, true);
+    new DataView(buf.buffer).setUint32(32, 54, true); // 14+20+20
+    // 以太网头
+    buf.set([0xaa,0xbb,0xcc,0xdd,0xee,0xff], 40); // dstMac
+    buf.set([0x11,0x22,0x33,0x44,0x55,0x66], 46); // srcMac
+    buf[52] = 0x08; buf[53] = 0x00; // EtherType=0x0800
+    // IP头
+    buf[54] = 0x45; // version+ihl
+    buf[55] = 0x00; // TOS
+    buf[56] = 0x00; buf[57] = 0x28; // total length
+    buf[58] = 0x12; buf[59] = 0x34; // ID
+    buf[60] = 0x00; buf[61] = 0x00; // flags+frag offset
+    buf[62] = 0x40; // TTL=64
+    buf[63] = 6; // protocol=TCP
+    buf[64] = 0xde; buf[65] = 0xad; // header checksum
+    buf[66] = 192; buf[67] = 168; buf[68] = 1; buf[69] = 1; // src IP
+    buf[70] = 192; buf[71] = 168; buf[72] = 1; buf[73] = 2; // dst IP
+    // TCP头
+    buf[74] = 0x00; buf[75] = 0x50; // src port 80
+    buf[76] = 0x01; buf[77] = 0xbb; // dst port 443
+    buf[78] = 0x12; buf[79] = 0x34; buf[80] = 0x56; buf[81] = 0x78; // seq
+    buf[82] = 0x9a; buf[83] = 0xbc; buf[84] = 0xde; buf[85] = 0xf0; // ack
+    buf[86] = 0x50; // data offset+flags
+    buf[87] = 0x18; // flags
+    buf[88] = 0x01; buf[89] = 0x00; // win
+    buf[90] = 0xbe; buf[91] = 0xef; // checksum
+    buf[92] = 0x00; buf[93] = 0x00; // urg ptr
+    const result = PcapParser.parsePcapFile(buf.buffer);
+    const pkt = result.packets[0];
+    expect(pkt.srcMac).toBe('11:22:33:44:55:66'.toUpperCase());
+    expect(pkt.dstMac).toBe('AA:BB:CC:DD:EE:FF');
+    expect(pkt.etherType).toBe('0x0800');
+    expect(pkt.ipTtl).toBe(64);
+    expect(pkt.ipId).toBe(0x1234);
+    expect(pkt.ipChecksum).toBe('0xdead');
+    expect(pkt.tcpSeq).toBe(0x12345678);
+    expect(pkt.tcpAck).toBe(0x9abcdef0);
+    expect(pkt.tcpWin).toBe(256);
+    expect(pkt.tcpChecksum).toBe('0xbeef');
+  });
+
+  test('should parse and expose UDP low-level fields', () => {
+    // 构造一个包含以太网、IP、UDP头的最小包
+    const buf = new Uint8Array(24 + 16 + 14 + 20 + 8);
+    new DataView(buf.buffer).setUint32(0, 0xa1b2c3d4, false);
+    new DataView(buf.buffer).setUint32(24, 1, true);
+    new DataView(buf.buffer).setUint32(28, 2, true);
+    new DataView(buf.buffer).setUint32(32, 42, true); // 14+20+8
+    // 以太网头
+    buf.set([0xaa,0xbb,0xcc,0xdd,0xee,0xff], 40); // dstMac
+    buf.set([0x11,0x22,0x33,0x44,0x55,0x66], 46); // srcMac
+    buf[52] = 0x08; buf[53] = 0x00; // EtherType=0x0800
+    // IP头
+    buf[54] = 0x45; // version+ihl
+    buf[63] = 17; // protocol=UDP
+    // UDP头
+    buf[74] = 0x13; buf[75] = 0x88; // src port 5000
+    buf[76] = 0x27; buf[77] = 0x10; // dst port 10000
+    buf[78] = 0x00; buf[79] = 0x08; // len=8
+    buf[80] = 0xbe; buf[81] = 0xef; // checksum
+    const result = PcapParser.parsePcapFile(buf.buffer);
+    const pkt = result.packets[0];
+    expect(pkt.srcMac).toBe('11:22:33:44:55:66'.toUpperCase());
+    expect(pkt.dstMac).toBe('AA:BB:CC:DD:EE:FF');
+    expect(pkt.etherType).toBe('0x0800');
+    expect(pkt.udpLen).toBe(8);
+    expect(pkt.udpChecksum).toBe('0xbeef');
+  });
 }); 
