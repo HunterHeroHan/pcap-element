@@ -118,7 +118,7 @@ export class PcapRenderer {
         <h3>${this.escapeHtml(texts.packetList)} (${data.packets.length})</h3>
         ${data.packets.map((packet, index) => {
       const protocolLower = packet.protocol.toLowerCase();
-      const timestamp = new Date(packet.timestamp * 1000).toISOString();
+      const timestamp = this.formatTimestamp(packet.timestamp);
       const isEven = index % 2 === 0;
 
       // 根据显示模式渲染数据包内容
@@ -258,5 +258,12 @@ export class PcapRenderer {
    */
   private formatBytes(bytes: number): string {
     return FormatUtils.formatBytes(bytes);
+  }
+
+  // 新增格式化时间戳方法
+  private formatTimestamp(ts: number): string {
+    const d = new Date(ts * 1000);
+    const pad = (n: number, len = 2) => n.toString().padStart(len, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${pad(d.getMilliseconds(), 3)}`;
   }
 } 
