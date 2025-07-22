@@ -111,7 +111,8 @@ export type LanguageKey =
   | 'fullscreen'
   | 'exitFullscreen'
   | 'errorNoSrc'
-  | 'errorLoadFailed';
+  | 'errorLoadFailed'
+  | 'buttonLoading';
 
 /**
  * 多语言配置类型

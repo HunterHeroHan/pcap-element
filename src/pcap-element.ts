@@ -562,6 +562,16 @@ export class PcapElement extends HTMLElement {
     if (!this.shouldShowToggleButton()) return;
     this.toggleButton.disabled = true; // loading状态
     this.toggleButton.classList.add('loading');
+    // 国际化 loading 文本（优先buttonLoading，没有则用loading）
+    let loadingText = '';
+    try {
+      loadingText = await this.getText('buttonLoading');
+    } catch {
+      loadingText = await this.getText('loading');
+    }
+    this.toggleButton.innerHTML = '<span class="spinner" style="display:inline-block;vertical-align:middle;margin-right:6px;width:16px;height:16px;"><svg width="16" height="16" viewBox="0 0 50 50"><circle cx="25" cy="25" r="20" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-dasharray="31.4 31.4" transform="rotate(-90 25 25)"><animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="0.8s" repeatCount="indefinite"/></circle></svg></span>' + loadingText;
+    this.toggleButton.style.background = '#a5b4fc';
+    this.toggleButton.style.opacity = '0.7';
     this.setDisplayMode(this.displayMode === 'parsed' ? 'hex' : 'parsed');
     await this.updateToggleButton();
     if (this.cachedPcapData) {
@@ -569,6 +579,8 @@ export class PcapElement extends HTMLElement {
     }
     this.toggleButton.disabled = false;
     this.toggleButton.classList.remove('loading');
+    this.toggleButton.style.background = '';
+    this.toggleButton.style.opacity = '';
   }
 
   // 更新切换按钮文本

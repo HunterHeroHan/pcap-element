@@ -90,7 +90,12 @@
                             <h3><i class="fas fa-chart-bar"></i> PCAP-Element 解析结果</h3>
                         </div>
                         <div class="pcap-container">
-                            <pcap-element id="pcapViewer" src="{{vm.currentFile.url}}" enableHexToggle="true" lang="zh-cn" showFullscreenBtn="true">   
+                            <pcap-element id="pcapViewer" 
+                                src="{{vm.currentFile.url}}" 
+                                enableHexToggle="true" 
+                                lang="zh-cn" 
+                                showFullscreenBtn="true" 
+                                useCanvas="true">   
                             </pcap-element>
                         </div>
                     </div>

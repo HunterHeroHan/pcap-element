@@ -124,7 +124,6 @@ import type { PcapPacket, PcapData } from 'pcap-element/dist/pcap-element.d.ts';
 - 复杂方法已拆分为职责单一的辅助方法，便于维护
 - 关键类型均有 TypeScript 明确声明，避免 any
 - 切换按钮有 loading 状态，防止误触
-- 16进制包标题支持中英文国际化
 
 ## 属性说明
 
@@ -151,7 +150,7 @@ import type { PcapPacket, PcapData } from 'pcap-element/dist/pcap-element.d.ts';
 ### useCanvas 相关
 
 - **Q: useCanvas 有什么作用？**
-  - 当PCAP文件很大（>5000行）时，HTML渲染会变慢。设置 useCanvas="true" 后，大文件会自动分段用canvas渲染，极大提升性能。canvas渲染与HTML视觉完全一致，支持斑马色、对齐、分组等。
+  - 当PCAP文件很大（>5000行）时，HTML渲染会变慢。设置 useCanvas="true" 后，大文件会自动分段用canvas渲染，极大提升性能。canvas渲染与HTML视觉完全一致，支持斑马色、对齐等。
 - **Q: useCanvas 默认开启吗？**
   - 默认关闭。只有设置 useCanvas="true" 时才启用canvas分段渲染。
 - **Q: useCanvas 关闭时会怎样？**
@@ -167,39 +166,50 @@ import type { PcapPacket, PcapData } from 'pcap-element/dist/pcap-element.d.ts';
   - No matter how large the file, all rendering uses HTML. This is suitable for scenarios where you need to copy, select, or avoid canvas dependencies.
 
 ### 1. PCAP文件无法加载？
+
 - 检查src路径是否正确、文件是否支持CORS、服务器是否返回二进制内容
 
 ### 1. PCAP file cannot be loaded?
+
 - Check if the src path is correct, CORS is enabled, and the server returns binary content.
 
 ### 2. 只支持标准PCAP格式？
+
 - 是，magic number需为a1b2c3d4/d4c3b2a1/a1b23c4d/4d3cb2a1
 
 ### 2. Only standard PCAP format supported?
 - Yes, the magic number must be a1b2c3d4/d4c3b2a1/a1b23c4d/4d3cb2a1
 
 ### 3. 如何在React/Vue/Angular中用？
+
 - 只需在入口引入js文件，然后像普通HTML标签一样用即可
 
 ### 3. How to use in React/Vue/Angular?
+
 - Just import the JS file in your entry and use it as a normal HTML tag.
 
 ### 4. 为什么不需要引入CSS文件？
+
 - 样式已内置到组件中，避免外部依赖和404错误
 
 ### 4. Why no need to import CSS?
+
 - Styles are built-in to the component to avoid external dependencies and 404 errors.
 
 ### 5. 如何切换显示模式？
+
 - 使用`enableHexToggle`属性：`enableHexToggle`显示切换按钮，允许用户切换16进制/解析模式；不加时始终为解析模式
 
 ### 5. How to switch display mode?
+
 - Use the `enableHexToggle` attribute: `enableHexToggle` shows the toggle button, allowing users to switch between hex/parsed mode. If not set, always parsed mode.
 
 ### 6. 如何显示全屏按钮？
+
 - 使用`showFullscreenBtn`属性：`showFullscreenBtn`显示右上角全屏/恢复按钮，点击可切换全屏和普通模式
 
 ### 6. How to show the fullscreen button?
+
 - Use the `showFullscreenBtn` attribute: `showFullscreenBtn` shows the fullscreen/exit button at the top right, allowing users to toggle fullscreen mode.
 
 ## 🤝 贡献 | Contributing

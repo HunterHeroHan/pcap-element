@@ -37,7 +37,8 @@
     "port": "端口号",
     "flags": "标志位",
     "fullscreen": "全屏",
-    "exitFullscreen": "恢复"
+    "exitFullscreen": "恢复",
+    "buttonLoading": "切换中..."
   },
   "en-us": {
     "loading": "Loading PCAP data...",
@@ -77,6 +78,7 @@
     "port": "Port",
     "flags": "Flags",
     "fullscreen": "Fullscreen",
-    "exitFullscreen": "Exit Fullscreen"
+    "exitFullscreen": "Exit Fullscreen",
+    "buttonLoading": "Switching..."
   }
 } 
