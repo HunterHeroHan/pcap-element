@@ -489,6 +489,18 @@ export class PcapElement extends HTMLElement {
         box-shadow: 0 0 0 9999px rgba(0,0,0,0.12);
         overflow: auto !important;
       }
+      :host(.fullscreen) {
+        position: fixed !important;
+        top: 0; left: 0; right: 0; bottom: 0;
+        width: 100vw !important;
+        height: 100vh !important;
+        z-index: 9999 !important;
+        background: #fff !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: 0 0 0 9999px rgba(0,0,0,0.12);
+        overflow: auto !important;
+      }
       @media (max-width: 768px) {
         :host {
           padding: 8px;
