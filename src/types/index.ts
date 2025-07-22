@@ -1,61 +1,123 @@
-// PCAP解析相关类型定义
+// ========== DOM/全局对象扩展类型 ==========
 /**
- * 单个PCAP数据包结构
+ * 扩展 HTMLCanvasElement 以支持自定义属性
+ */
+declare global {
+  interface HTMLCanvasElement {
+    /** 存储当前canvas渲染的hex行数据 */
+    _hexLines?: string[][];
+    /** 存储当前canvas渲染的起始行号 */
+    _hexLineStart?: number;
+  }
+
+  /**
+   * 扩展 Window 以支持全局临时存储canvas数据
+   */
+  interface Window {
+    /**
+     * 存储每个canvas的渲染数据，key为canvasId
+     * lines: hex行数据
+     * canvasWidth/canvasHeight: 预留
+     * lineStart: 起始行号
+     */
+    __pcapHexCanvasData__?: Record<string, { lines: string[][]; canvasWidth: number; canvasHeight: number; lineStart: number }>;
+  }
+}
+
+/**
+ * 单个数据包结构
  */
 export interface PcapPacket {
-  timestamp: number; // 时间戳（秒）
-  length: number; // 数据包长度（字节）
-  data: string; // 原始数据（十六进制字符串）
-  source: string; // 源地址（IP或MAC）
-  destination: string; // 目的地址（IP或MAC）
-  protocol: string; // 协议类型（如TCP/UDP/ICMP等）
-  port?: number; // 端口号（可选）
-  flags?: string[]; // TCP标志位（可选）
-  // 新增底层字段
-  srcMac?: string; // 源MAC地址（格式：XX:XX:XX:XX:XX:XX）
-  dstMac?: string; // 目的MAC地址（格式：XX:XX:XX:XX:XX:XX）
-  etherType?: string; // 以太网类型（如0x0800）
-  ipTtl?: number; // IP TTL（生存时间）
-  ipId?: number; // IP标识符（ID）
-  ipChecksum?: string; // IP头部校验和（如0x1234）
-  tcpSeq?: number; // TCP序列号（无符号32位）
-  tcpAck?: number; // TCP确认号（无符号32位）
-  tcpWin?: number; // TCP窗口大小
-  tcpChecksum?: string; // TCP校验和（如0x1234）
-  udpLen?: number; // UDP长度（字节）
-  udpChecksum?: string; // UDP校验和（如0x1234）
+  source: string;
+  destination: string;
+  protocol: string;
+  length: number;
+  port?: number;
+  flags?: string[];
+  data: string;
+  srcMac?: string;
+  dstMac?: string;
+  etherType?: string;
+  ipTtl?: number;
+  ipId?: number;
+  ipChecksum?: string;
+  tcpSeq?: number;
+  tcpAck?: number;
+  tcpWin?: number;
+  tcpChecksum?: string;
+  udpLen?: number;
+  udpChecksum?: string;
+  timestamp: number;
 }
 
 /**
- * PCAP文件整体结构
+ * PCAP 文件解析后的数据结构
  */
 export interface PcapData {
-  packets: PcapPacket[]; // 所有数据包数组
+  packets: PcapPacket[];
   summary: {
-    totalPackets: number; // 总包数
-    totalBytes: number; // 总字节数
-    protocols: Record<string, number>; // 协议分布统计
-    topSources: Array<{address: string, count: number}>; // 活跃源地址
-    topDestinations: Array<{address: string, count: number}>; // 活跃目的地址
+    totalPackets: number;
+    totalBytes: number;
+    protocols: Record<string, number>;
+    topSources: Array<{ address: string; count: number }>;
+    topDestinations: Array<{ address: string; count: number }>;
   };
-  fullHex?: string; // 整个文件的十六进制字符串
+  fullHex: string;
 }
 
-// 国际化相关类型定义
 /**
- * 国际化文本key类型
+ * 国际化语言配置
  */
-export type LanguageKey = string;
+export interface LanguageConfig {
+  [key: string]: string;
+}
 
 /**
- * 单种语言的文本配置
+ * 支持的国际化 key
  */
-export type LanguageConfig = Record<LanguageKey, string>;
+export type LanguageKey =
+  | 'loading'
+  | 'summary'
+  | 'totalPackets'
+  | 'totalBytes'
+  | 'protocolTypes'
+  | 'protocolDistribution'
+  | 'topSources'
+  | 'topDestinations'
+  | 'packetList'
+  | 'noPackets'
+  | 'sourceAddress'
+  | 'destinationAddress'
+  | 'length'
+  | 'bytes'
+  | 'protocol'
+  | 'port'
+  | 'flags'
+  | 'srcMac'
+  | 'dstMac'
+  | 'etherType'
+  | 'ipTtl'
+  | 'ipId'
+  | 'ipChecksum'
+  | 'tcpSeq'
+  | 'tcpAck'
+  | 'tcpWin'
+  | 'tcpChecksum'
+  | 'udpLen'
+  | 'udpChecksum'
+  | 'hexViewTitle'
+  | 'showHex'
+  | 'showParsed'
+  | 'fullscreen'
+  | 'exitFullscreen'
+  | 'errorNoSrc'
+  | 'errorLoadFailed';
 
 /**
- * 所有支持的语言配置
+ * 多语言配置类型
  */
-export type Languages = {
-  'zh-cn': LanguageConfig;
-  'en-us': LanguageConfig;
-}; 
+export interface Languages {
+  [lang: string]: LanguageConfig;
+}
+
+export {}; 

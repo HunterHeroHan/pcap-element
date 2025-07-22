@@ -86,6 +86,7 @@ import 'pcap-element/dist/pcap-element.esm.min.js';
 | lang | string | zh-cn  | 语言（支持zh-cn, en-us）|
 | enableHexToggle | boolean | false | 是否显示切换按钮（布尔属性，控制能否切换16进制/解析模式）|
 | showFullscreenBtn | boolean | false | 是否显示全屏按钮（布尔属性，显示右上角全屏/恢复按钮）|
+| useCanvas      | boolean | false    | 是否启用大文件canvas分段渲染（仅设置为'true'时生效） |
 
 ### 事件 | Events
 
@@ -125,31 +126,81 @@ import type { PcapPacket, PcapData } from 'pcap-element/dist/pcap-element.d.ts';
 - 切换按钮有 loading 状态，防止误触
 - 16进制包标题支持中英文国际化
 
-## 🌐 常见问题 | FAQ
+## 属性说明
+
+| 属性名         | 类型    | 默认值   | 说明 |
+| -------------- | ------- | -------- | ---- |
+| src            | string  | -        | PCAP文件URL |
+| lang           | string  | zh-cn    | 语言（zh-cn/en） |
+| enableHexToggle| boolean | false    | 是否显示16进制切换按钮 |
+| showFullscreenBtn | boolean | false | 是否显示全屏按钮 |
+| useCanvas      | boolean | false    | 是否启用大文件canvas分段渲染（仅设置为'true'时生效） |
+
+## 使用示例
+
+```html
+<!-- 默认全部HTML渲染 -->
+<pcap-element src="demo.pcap"></pcap-element>
+
+<!-- 启用大文件canvas分段渲染 -->
+<pcap-element src="demo.pcap" useCanvas="true"></pcap-element>
+```
+
+## FAQ
+
+### useCanvas 相关
+
+- **Q: useCanvas 有什么作用？**
+  - 当PCAP文件很大（>5000行）时，HTML渲染会变慢。设置 useCanvas="true" 后，大文件会自动分段用canvas渲染，极大提升性能。canvas渲染与HTML视觉完全一致，支持斑马色、对齐、分组等。
+- **Q: useCanvas 默认开启吗？**
+  - 默认关闭。只有设置 useCanvas="true" 时才启用canvas分段渲染。
+- **Q: useCanvas 关闭时会怎样？**
+  - 无论文件多大，全部用HTML渲染，适合需要复制、选中、无canvas依赖的场景。
+
+### useCanvas (English)
+
+- **Q: What does useCanvas do?**
+  - When the PCAP file is very large (>5000 lines), HTML rendering can become slow. Setting useCanvas="true" will automatically use canvas chunk rendering for large files, greatly improving performance. The canvas rendering is visually identical to HTML, supporting zebra striping, alignment, and grouping.
+- **Q: Is useCanvas enabled by default?**
+  - No, it is disabled by default. Canvas chunk rendering is only enabled when useCanvas="true" is set.
+- **Q: What happens if useCanvas is disabled?**
+  - No matter how large the file, all rendering uses HTML. This is suitable for scenarios where you need to copy, select, or avoid canvas dependencies.
 
 ### 1. PCAP文件无法加载？
-
 - 检查src路径是否正确、文件是否支持CORS、服务器是否返回二进制内容
 
-### 2. 只支持标准PCAP格式？
+### 1. PCAP file cannot be loaded?
+- Check if the src path is correct, CORS is enabled, and the server returns binary content.
 
+### 2. 只支持标准PCAP格式？
 - 是，magic number需为a1b2c3d4/d4c3b2a1/a1b23c4d/4d3cb2a1
 
-### 3. 如何在React/Vue/Angular中用？
+### 2. Only standard PCAP format supported?
+- Yes, the magic number must be a1b2c3d4/d4c3b2a1/a1b23c4d/4d3cb2a1
 
+### 3. 如何在React/Vue/Angular中用？
 - 只需在入口引入js文件，然后像普通HTML标签一样用即可
 
-### 4. 为什么不需要引入CSS文件？
+### 3. How to use in React/Vue/Angular?
+- Just import the JS file in your entry and use it as a normal HTML tag.
 
+### 4. 为什么不需要引入CSS文件？
 - 样式已内置到组件中，避免外部依赖和404错误
 
-### 5. 如何切换显示模式？
+### 4. Why no need to import CSS?
+- Styles are built-in to the component to avoid external dependencies and 404 errors.
 
+### 5. 如何切换显示模式？
 - 使用`enableHexToggle`属性：`enableHexToggle`显示切换按钮，允许用户切换16进制/解析模式；不加时始终为解析模式
 
-6. 如何显示全屏按钮？
+### 5. How to switch display mode?
+- Use the `enableHexToggle` attribute: `enableHexToggle` shows the toggle button, allowing users to switch between hex/parsed mode. If not set, always parsed mode.
 
+### 6. 如何显示全屏按钮？
 - 使用`showFullscreenBtn`属性：`showFullscreenBtn`显示右上角全屏/恢复按钮，点击可切换全屏和普通模式
+
+### 6. How to show the fullscreen button?
+- Use the `showFullscreenBtn` attribute: `showFullscreenBtn` shows the fullscreen/exit button at the top right, allowing users to toggle fullscreen mode.
 
 ## 🤝 贡献 | Contributing
 
@@ -279,18 +330,4 @@ import type { PcapPacket, PcapData } from 'pcap-element/dist/pcap-element.d.ts';
 4. Why no CSS file needed?
    - Styles are built-in to avoid external dependencies and 404 errors
 5. How to switch display mode?
-   - Use the `enableHexToggle` attribute: `enableHexToggle` shows the toggle button, allowing users to switch between hex/parsed mode. If not set, always parsed mode.
-
-6. How to show the fullscreen button?
-
-- Use the `showFullscreenBtn` attribute: `showFullscreenBtn` shows the fullscreen/exit button at the top right, allowing users to toggle fullscreen mode.
-
-## Contributing
-
-- PRs, issues, and suggestions welcome
-- Code style: TypeScript + ESLint
-- Entry: src/pcap-element-lib.ts
-
-## License
-
-MIT
+   - Use the `enableHexToggle`

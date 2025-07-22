@@ -36,12 +36,12 @@ export class PcapRenderer {
    * @param displayMode 显示模式：'parsed' | 'hex'
    * @returns HTML字符串
    */
-  async renderPcapData(data: PcapData, displayMode: 'parsed' | 'hex' = 'parsed'): Promise<string> {
+  async renderPcapData(data: PcapData, displayMode: 'parsed' | 'hex' = 'parsed', useCanvas: boolean = true): Promise<string> {
     const texts = await this.i18nManager.getAllTexts(); // 获取所有国际化文本
     const summaryHtml = this.renderSummary(data, texts); // 渲染摘要信息
     if (displayMode === 'hex') {
       // 只渲染摘要+全文件16进制
-      return summaryHtml + this.renderFullHex(data, texts);
+      return summaryHtml + this.renderFullHex(data, texts, useCanvas);
     }
     const packetsHtml = this.renderPackets(data, texts, displayMode); // 渲染数据包列表
     return summaryHtml + packetsHtml; // 拼接返回
@@ -116,7 +116,7 @@ export class PcapRenderer {
     return `
       <div class="packets">
         <h3>${this.escapeHtml(texts.packetList)} (${data.packets.length})</h3>
-        ${data.packets.map((packet, index) => {
+        ${data.packets.map((packet: PcapPacket, index: number) => {
       const protocolLower = packet.protocol.toLowerCase();
       const timestamp = this.formatTimestamp(packet.timestamp);
       const isEven = index % 2 === 0;
@@ -197,18 +197,127 @@ export class PcapRenderer {
 
   /**
    * 渲染整个文件的16进制内容
+   * 当数据行数大于5000时，使用Canvas渲染，否则用HTML
    */
-  private renderFullHex(data: PcapData, texts: Record<string, string>): string {
+  private renderFullHex(data: PcapData, texts: Record<string, string>, useCanvas: boolean = true): string {
     if (!data.fullHex) return '';
-    const hexData = this.formatHexData(data.fullHex);
-    return `
-      <div class="packets">
-        <h3>${this.escapeHtml(texts.hexViewTitle)}</h3>
-        <div class="hex-data">
-          <pre>${hexData}</pre>
+    // 计算行数
+    const bytes = data.fullHex.split(' ').filter((b: string) => b.trim());
+    const lineCount = Math.ceil(bytes.length / 16);
+    const MAX_CANVAS_HEIGHT = 32760;
+    const lineHeight = 22;
+    const maxLinesPerCanvas = Math.floor(MAX_CANVAS_HEIGHT / lineHeight); // 1487
+    if (useCanvas && lineCount > 6000) {
+      // 只保留前2500行和后2500行HTML，中间canvas
+      const lines: string[][] = [];
+      for (let i = 0; i < bytes.length; i += 16) {
+        lines.push(bytes.slice(i, i + 16));
+      }
+      const htmlLinesTop = lines.slice(0, 2500);
+      const htmlLinesBottom = lines.slice(-2500);
+      const canvasLines = lines.slice(2500, -2500);
+      // 前2500行HTML
+      let html = `<pre>${this.formatHexLinesToHtml(htmlLinesTop, 0)}</pre>`;
+      // 中间canvas分段
+      let canvasIndex = 0;
+      let canvasLineStart = 2500;
+      for (let start = 0; start < canvasLines.length; start += maxLinesPerCanvas) {
+        const chunk = canvasLines.slice(start, start + maxLinesPerCanvas);
+        const canvasId = `hex-canvas-${Math.random().toString(36).slice(2)}-${canvasIndex}`;
+        if (typeof window !== 'undefined') {
+          window.__pcapHexCanvasData__ = window.__pcapHexCanvasData__ || {};
+          window.__pcapHexCanvasData__[canvasId] = { lines: chunk, canvasWidth: 0, canvasHeight: 0, lineStart: canvasLineStart };
+        }
+        html += `<canvas id="${canvasId}"></canvas>`;
+        canvasIndex++;
+        canvasLineStart += chunk.length;
+      }
+      // 后2500行HTML
+      html += `<pre>${this.formatHexLinesToHtml(htmlLinesBottom, lines.length - 2500)}</pre>`;
+      return `
+        <div class="packets">
+          <h3>${this.escapeHtml(texts.hexViewTitle)}</h3>
+          <div class="hex-data" style="overflow-x:auto;">
+            ${html}
+          </div>
         </div>
-      </div>
-    `;
+      `;
+    } else if (useCanvas && lineCount > 5000) {
+      // Canvas分段渲染
+      const lines: string[][] = [];
+      for (let i = 0; i < bytes.length; i += 16) {
+        lines.push(bytes.slice(i, i + 16));
+      }
+      let html = '';
+      let canvasIndex = 0;
+      let canvasLineStart = 0;
+      for (let start = 0; start < lines.length; start += maxLinesPerCanvas) {
+        const chunk = lines.slice(start, start + maxLinesPerCanvas);
+        const canvasId = `hex-canvas-${Math.random().toString(36).slice(2)}-${canvasIndex}`;
+        if (typeof window !== 'undefined') {
+          window.__pcapHexCanvasData__ = window.__pcapHexCanvasData__ || {};
+          window.__pcapHexCanvasData__[canvasId] = { lines: chunk, canvasWidth: 0, canvasHeight: 0, lineStart: canvasLineStart };
+        }
+        html += `<canvas id="${canvasId}"></canvas>`;
+        canvasIndex++;
+        canvasLineStart += chunk.length;
+      }
+      return `
+        <div class="packets">
+          <h3>${this.escapeHtml(texts.hexViewTitle)}</h3>
+          <div class="hex-data" style="overflow-x:auto;">
+            ${html}
+          </div>
+        </div>
+      `;
+    } else {
+      // HTML渲染
+      const hexData = this.formatHexData(data.fullHex);
+      return `
+        <div class="packets">
+          <h3>${this.escapeHtml(texts.hexViewTitle)}</h3>
+          <div class="hex-data">
+            <pre>${hexData}</pre>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  // 新增：将多行hex渲染为HTML，支持指定起始行号
+  private formatHexLinesToHtml(lines: string[][], startLine: number): string {
+    return lines.map((lineBytes, i) => {
+      const offset = (i + startLine).toString(16).padStart(8, '0');
+      let hexStr = '';
+      for (let j = 0; j < lineBytes.length; j++) {
+        if (j > 0 && j % 8 === 0) hexStr += '   ';
+        hexStr += lineBytes[j].padStart(2, '0') + ' ';
+      }
+      hexStr += '   '.repeat(16 - lineBytes.length);
+      let asciiStr = lineBytes.map(b => {
+        const charCode = parseInt(b, 16);
+        const ch = (charCode >= 32 && charCode <= 126) ? String.fromCharCode(charCode) : '.';
+        return this.escapeHtml(ch);
+      }).join('');
+      if (lineBytes.length < 16) asciiStr += ' '.repeat(16 - lineBytes.length);
+      return `<div class="hex-line"><span class="hex-offset">${offset}:</span><span class="hex-bytes">${hexStr}</span><span class="hex-ascii">| ${asciiStr} |</span></div>`;
+    }).join('');
+  }
+
+  // 渲染单个canvas chunk
+  private formatHexDataCanvasChunk(lines: string[][], canvasId: string): { html: string, canvasWidth: number, canvasHeight: number } {
+    const fontSize = 10; // px
+    const lineHeight = 22; // px
+    const fontFamily = 'JetBrains Mono, Consolas, Monaco, Courier New, monospace';
+    const offsetWidth = 60; // 偏移区宽度
+    const hexByteWidth = 22; // 每字节宽度
+    const hexGroupGap = 12; // 8字节分组间距
+    const asciiGap = 24; // HEX区与ASCII区间距
+    const asciiWidth = 16 * 10; // 16字节ASCII区宽度
+    const canvasWidth = offsetWidth + 16 * hexByteWidth + hexGroupGap + asciiGap + asciiWidth + 30;
+    const canvasHeight = lines.length * lineHeight + 10;
+    const html = `<canvas id="${canvasId}" width="${canvasWidth}" height="${canvasHeight}" style="display:block;"></canvas>`;
+    return { html, canvasWidth, canvasHeight };
   }
 
   /**

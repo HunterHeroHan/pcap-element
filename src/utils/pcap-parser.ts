@@ -247,7 +247,8 @@ function generateSummary(packets: PcapPacket[]): PcapData {
         protocols: {},
         topSources: [],
         topDestinations: []
-      }
+      },
+      fullHex: ''
     };
   }
   const protocols: Record<string, number> = {};
@@ -263,8 +264,8 @@ function generateSummary(packets: PcapPacket[]): PcapData {
     destinations[destination] = (destinations[destination] || 0) + 1;
     totalBytes += packet.length;
   });
-  const topSources = getTopN(sources, 5);
-  const topDestinations = getTopN(destinations, 5);
+  const topSources = getTopN(sources, 3);
+  const topDestinations = getTopN(destinations, 3);
   return {
     packets,
     summary: {
@@ -273,6 +274,7 @@ function generateSummary(packets: PcapPacket[]): PcapData {
       protocols,
       topSources,
       topDestinations
-    }
+    },
+    fullHex: ''
   };
 } 

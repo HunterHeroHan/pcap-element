@@ -2,6 +2,7 @@ import { PcapParser } from './utils/pcap-parser';
 import { I18nManager } from './i18n/i18n-manager';
 import { PcapData, LanguageKey } from './types/index';
 import { PcapRenderer } from './renderers/pcap-renderer';
+import { HexCanvasRenderer } from './renderers/hex-canvas-renderer';
 
 /**
  * PcapElement 自定义元素
@@ -31,6 +32,7 @@ export class PcapElement extends HTMLElement {
   private fullscreen: boolean = false;
   private showFullscreenBtn: boolean = false;
   private fullscreenButton?: HTMLButtonElement;
+  private _resizeHandler: (() => void) | null = null;
 
   constructor() {
     super();
@@ -53,7 +55,12 @@ export class PcapElement extends HTMLElement {
 
   // 监听的属性列表，src为数据源，lang为语言，show-hex为是否显示16进制
   static get observedAttributes() {
-    return ['src', 'lang', 'enableHexToggle', 'showfullscreenbtn'];
+    return ['src', 'lang', 'enableHexToggle', 'showfullscreenbtn', 'useCanvas'];
+  }
+
+  private get useCanvas(): boolean {
+    const attr = this.getAttribute('useCanvas');
+    return attr === 'true'; // 默认关闭
   }
 
   get showFullscreen() {
@@ -75,7 +82,10 @@ export class PcapElement extends HTMLElement {
   // 判断是否应显示切换按钮
   private shouldShowToggleButton(): boolean {
     // enableHexToggle为布尔属性，存在即为true
-    return this.hasAttribute('enableHexToggle') && this.getAttribute('enableHexToggle') !== 'false';
+    // 兼容老属性show-hex
+    const enableHex = this.hasAttribute('enableHexToggle') && this.getAttribute('enableHexToggle') !== 'false';
+    const showHex = this.hasAttribute('show-hex') && this.getAttribute('show-hex') !== 'false';
+    return enableHex || showHex;
   }
 
   // 设置当前显示模式
@@ -86,11 +96,38 @@ export class PcapElement extends HTMLElement {
   // 渲染当前模式内容
   private async renderCurrentMode(data: PcapData) {
     if (this.displayMode === 'hex') {
-      const hexHtml = await this.renderer.renderPcapData(data, 'hex');
+      const hexHtml = await this.renderer.renderPcapData(data, 'hex', this.useCanvas);
       this.contentElement.innerHTML = `<div class="hex-content">${hexHtml}</div>`;
+      if (this.useCanvas) {
+        // 检查是否有多个canvas
+        const canvases = this.contentElement.querySelectorAll('canvas');
+        canvases.forEach(canvas => {
+          if (canvas.id && window.__pcapHexCanvasData__ && window.__pcapHexCanvasData__[canvas.id]) {
+            const { lines, lineStart } = window.__pcapHexCanvasData__[canvas.id];
+            HexCanvasRenderer.draw(canvas as HTMLCanvasElement, lines, lineStart || 0);
+            delete window.__pcapHexCanvasData__[canvas.id];
+          }
+        });
+        // 监听resize自适应
+        if (!this._resizeHandler) {
+          this._resizeHandler = () => {
+            const canvases = this.contentElement.querySelectorAll('canvas');
+            canvases.forEach(canvas => {
+              const lines = (canvas as HTMLCanvasElement)._hexLines;
+              const lineStart = (canvas as HTMLCanvasElement)._hexLineStart || 0;
+              if (lines) HexCanvasRenderer.draw(canvas as HTMLCanvasElement, lines, lineStart);
+            });
+          };
+          window.addEventListener('resize', this._resizeHandler);
+        }
+      }
     } else {
       const parsedHtml = await this.renderer.renderPcapData(data, 'parsed');
       this.contentElement.innerHTML = `<div class="parsed-content">${parsedHtml}</div>`;
+      if (this._resizeHandler) {
+        window.removeEventListener('resize', this._resizeHandler);
+        this._resizeHandler = null;
+      }
     }
     this.updateContentDisplayMode();
   }
@@ -117,6 +154,10 @@ export class PcapElement extends HTMLElement {
     } else if (name === 'showfullscreenbtn' && oldValue !== newValue) {
       this.showFullscreenBtn = newValue !== null && newValue !== 'false';
       this.updateFullscreenButton();
+    } else if (name === 'useCanvas' && oldValue !== newValue) {
+      if (this.cachedPcapData) {
+        await this.renderPcapData(this.cachedPcapData);
+      }
     }
   }
 
@@ -464,18 +505,36 @@ export class PcapElement extends HTMLElement {
 
   // 初始化各个DOM元素内容
   private async setupElements() {
+    this.setupLoadingElement();
+    this.setupErrorElement();
+    this.setupContentElement();
+    await this.setupToggleButton();
+    await this.setupFullscreenButton();
+    this.appendElementsToShadowRoot();
+    this.initContentDisplay();
+  }
+
+  private setupLoadingElement() {
     this.loadingElement.className = 'loading';
-    this.loadingElement.textContent = await this.getText('loading');
+  }
+
+  private setupErrorElement() {
     this.errorElement.className = 'error';
     this.errorElement.style.display = 'none';
+  }
+
+  private setupContentElement() {
     this.contentElement.className = 'content';
-    
-    // 设置切换按钮
+  }
+
+  private async setupToggleButton() {
     this.toggleButton.className = 'format-toggle';
-    this.toggleButton.style.display = 'none'; // 初始隐藏，加载数据后显示
+    this.toggleButton.style.display = 'none';
     this.toggleButton.addEventListener('click', () => this.toggleDisplayMode());
-    
-    // 新增全屏按钮
+    this.toggleButton.textContent = await this.getText('loading');
+  }
+
+  private async setupFullscreenButton() {
     this.fullscreenButton = document.createElement('button');
     this.fullscreenButton.className = 'fullscreen-toggle';
     const texts = await this.i18nManager.getAllTexts();
@@ -483,12 +542,17 @@ export class PcapElement extends HTMLElement {
     this.updateFullscreenButtonIcon();
     this.fullscreenButton.style.display = this.showFullscreenBtn ? 'inline-block' : 'none';
     this.fullscreenButton.addEventListener('click', () => this.toggleFullscreen());
-    // 固定右上角，紧邻toggleButton右侧
+  }
+
+  private appendElementsToShadowRoot() {
     this.shadow.appendChild(this.loadingElement);
     this.shadow.appendChild(this.errorElement);
     this.shadow.appendChild(this.contentElement);
     this.shadow.appendChild(this.toggleButton);
-    this.shadow.appendChild(this.fullscreenButton);
+    this.shadow.appendChild(this.fullscreenButton!);
+  }
+
+  private initContentDisplay() {
     this.updateContentDisplayMode();
     this.updateFullscreenButton();
   }
