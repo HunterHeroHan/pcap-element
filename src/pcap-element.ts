@@ -451,7 +451,6 @@ export class PcapElement extends HTMLElement {
         color: var(--color-gray);
         margin: 6px 6px 6px 18px;
         font-weight: 400;
-        letter-spacing: 0.5px;
         display: inline-block;
         white-space: pre;
       }

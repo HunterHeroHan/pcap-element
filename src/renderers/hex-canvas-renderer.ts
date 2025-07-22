@@ -11,7 +11,7 @@ export class HexCanvasRenderer {
       await doc.fonts.ready;
     }
     const fontSize = 12; // px，与HTML一致
-    const lineHeight = 22;
+    const lineHeight = 28; // 行高调整为28
     const fontFamily = 'JetBrains Mono, Consolas, Monaco, Courier New, monospace';
     // 2. 动态获取父容器宽度
     const parent = canvas.parentElement;
@@ -27,7 +27,7 @@ export class HexCanvasRenderer {
       hexByteWidth = tempCtx.measureText('00 ').width;
       hexGroupGap = tempCtx.measureText('   ').width;
       offsetWidth = tempCtx.measureText('00000000:').width + 8;
-      asciiWidth = tempCtx.measureText('| 0000000000000000 |').width;
+      asciiWidth = tempCtx.measureText('| 0000000000000000 |   ').width;
       asciiGap = tempCtx.measureText('  ').width;
     }
     // 4. 计算canvas宽高
@@ -45,26 +45,26 @@ export class HexCanvasRenderer {
     ctx.save();
     ctx.scale(devicePixelRatio, devicePixelRatio);
     ctx.font = `${fontSize}px ${fontFamily}`;
-    ctx.textBaseline = 'top';
+    ctx.textBaseline = 'middle';
     // 背景
     ctx.fillStyle = '#f3f4f6'; // 与HTML一致
     ctx.fillRect(0, 0, width, height);
     for (let row = 0; row < lines.length; row++) {
       const globalRow = row + lineStart;
-      const y = 8 + row * lineHeight;
+      const y = 8 + row * lineHeight + lineHeight / 2;
       // 斑马色（全局行号）
       if (globalRow % 2 === 1) {
         ctx.fillStyle = '#f8fafc';
-        ctx.fillRect(0, y - 2, width, lineHeight);
+        ctx.fillRect(0, 8 + row * lineHeight, width, lineHeight);
       }
       // 偏移区
       ctx.font = `${fontSize}px ${fontFamily}`;
       ctx.fillStyle = '#9ca3af';
       ctx.textAlign = 'start';
       const offset = globalRow.toString(16).padStart(8, '0') + ':';
-      ctx.fillText(offset, 0, y);
+      ctx.fillText(offset, 2, y);
       // HEX区
-      let x = offsetWidth;
+      let x = offsetWidth + 2;
       ctx.textAlign = 'start';
       for (let j = 0; j < lines[row].length; j++) {
         if (j > 0 && j % 8 === 0) x += hexGroupGap;
@@ -82,8 +82,9 @@ export class HexCanvasRenderer {
       ascii = ascii.padEnd(16, ' ');
       ctx.fillStyle = '#6b7280';
       ctx.textAlign = 'start';
-      const asciiX = offsetWidth + hexByteWidth * 16 + hexGroupGap + asciiGap;
-      ctx.fillText('| ' + ascii + ' |', asciiX, y);
+      const asciiX = offsetWidth + hexByteWidth * 16 + hexGroupGap + asciiGap + 2;
+      // 兼容 tempCtx 可能为 null
+      ctx.fillText('| ' + ascii + ' |   ', asciiX, y);
     }
     ctx.restore();
     canvas._hexLines = lines;
