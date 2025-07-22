@@ -479,8 +479,8 @@ export class PcapElement extends HTMLElement {
       }
       .fullscreen {
         position: fixed !important;
-        top: 0; left: 0; right: 0; bottom: 0;
-        width: 100vw !important;
+        top: 0; left: 0; right: 6px; bottom: 0;
+        width: auto !important;
         height: 100vh !important;
         z-index: 9999 !important;
         background: #fff !important;
@@ -488,11 +488,12 @@ export class PcapElement extends HTMLElement {
         border-radius: 0 !important;
         box-shadow: 0 0 0 9999px rgba(0,0,0,0.12);
         overflow: auto !important;
+        overflow-y: auto !important;
       }
       :host(.fullscreen) {
         position: fixed !important;
-        top: 0; left: 0; right: 0; bottom: 0;
-        width: 100vw !important;
+        top: 0; left: 0; right: 6px; bottom: 0;
+        width: auto !important;
         height: 100vh !important;
         z-index: 9999 !important;
         background: #fff !important;
@@ -500,6 +501,7 @@ export class PcapElement extends HTMLElement {
         border-radius: 0 !important;
         box-shadow: 0 0 0 9999px rgba(0,0,0,0.12);
         overflow: auto !important;
+        overflow-y: auto !important;
       }
       @media (max-width: 768px) {
         :host {
@@ -743,6 +745,8 @@ export class PcapElement extends HTMLElement {
     this.fullscreen = !this.fullscreen;
     this.updateFullscreenState();
     this.updateFullscreenButton();
+    // 全屏时禁止body滚动
+    document.body.style.overflow = this.fullscreen ? 'hidden' : '';
   }
   private updateFullscreenState() {
     // 兼容:host和shadow host
@@ -750,9 +754,11 @@ export class PcapElement extends HTMLElement {
     if (this.fullscreen) {
       this.classList.add('fullscreen');
       if (host) host.classList.add('fullscreen');
+      document.body.style.overflow = 'hidden';
     } else {
       this.classList.remove('fullscreen');
       if (host) host.classList.remove('fullscreen');
+      document.body.style.overflow = '';
     }
   }
   private updateFullscreenButton() {
